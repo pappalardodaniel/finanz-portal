@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+
+# virtuelle Umgebungen
+.venv/
+venv/
+env/
+
+# Zugangsdaten und private Einstellungen: nie ins Repo
+*.env
+.env*
+!.env.example
+einstellungen.toml
+
+# Daten: Kurse, Datenbanken, Journal gehören nicht ins Repo
+daten/
+data/
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+NOTAUS
+ECHTGELD_FREIGABE
+
+# Markt-Teil (kitrader.markt) und KI-Agent
+agent/node_modules/
+agent/.env
+agent/*.log
+agent/.routinen.json
+*.parquet
+*.json.gz
+*.csv.gz
+*.pcap*
+SYNTH-*
+*.log
+# Sicherungen vor Änderungen (.datei.vor-xyz)
+.*vor-*
+# erfundene Testkerzen der Indikator-Prüfung sind keine Marktdaten
+!tests/markt/daten/

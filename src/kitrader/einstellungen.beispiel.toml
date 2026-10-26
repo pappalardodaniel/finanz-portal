@@ -1,0 +1,214 @@
+# kitrader – Beispiel-Einstellungen
+#
+# Kopieren nach  ~/.config/kitrader/einstellungen.toml  (oder Pfad in der Umgebungsvariable KITRADER_KONFIG).
+# Die Datei muss nur die Werte enthalten, die du ändern willst; alles andere übernimmt kitrader aus den Standardwerten.
+# Die hier angegebenen Werte sind die Standardwerte (vorsichtig gewählt, kein Anlagetipp).
+# API-Schlüssel gehören NIE ins Repo, nur in deine private Einstellungsdatei.
+
+# Betriebsart: "papier" (Simulation, Standard), "demo" (Demokonto des Brokers), "echt" (echtes Geld).
+# "echt" läuft nur, wenn zusätzlich im Datenordner die Datei ECHTGELD_FREIGABE liegt, die das heutige
+# Datum (JJJJ-MM-TT) enthält. Die Freigabe gilt also immer nur für einen Tag.
+modus = "papier"
+waehrung = "EUR"
+
+# Welcher echte Broker für demo/echt benutzt wird: "ibkr" (Interactive Brokers) oder "kraken".
+broker = "ibkr"
+
+# Woher die Kurse für den Papierhandel kommen: "ibkr", "kraken" oder "wiedergabe" (nur Testdaten aus einer CSV).
+kursquelle = "ibkr"
+
+[ibkr]                    # Interactive Brokers: das Client Portal Gateway startest du selbst (siehe BROKER.md)
+basis_url = ""            # leer = Standardadresse der Anbindung
+konto_id = ""             # Demokonto: Kennung beginnt mit "DU"; leer lässt demo nicht zu
+
+[kraken]                  # Kraken kennt kein Demokonto: demo heißt hier "nur prüfen" (Orders werden nur validiert).
+waehrung = "EUR"          # Schlüssel gehören nicht hierher, sondern in ~/.config/kitrader/kraken.env
+spot_paare = []           # Paare, deren Bestand als Position zählt, z. B. ["XBTEUR"]
+hebel = 0                 # 0 = kein Margin, kein Short
+
+[papier]
+startguthaben = 10000.0   # Startkapital der Simulation
+short_erlaubt = true      # Der Papier-Broker darf leerverkaufen (die Risikoprüfung unten ist strenger)
+hebel = 1.0               # Summe aller Positionen darf Gesamtwert mal hebel nicht übersteigen
+
+[kosten]                  # gelten für Papierhandel und Backtest
+gebuehr_fest = 1.0        # feste Gebühr je Ausführung (Kontowährung)
+gebuehr_prozent = 0.05    # Gebühr je Ausführung in % vom Umsatz (bei getrennten Gebühren: die Taker-Gebühr für Marktorders und Stops)
+# gebuehr_maker_prozent = 0.05   # optional, nur Backtest: Gebühr fürs Gewinnziel (Limit-Order); fehlt sie, gilt gebuehr_prozent.
+#                                # Kraken Pro, niedrigste Stufe (Stand 26.10.2026): Maker 0,40 / Taker 0,80 (siehe STRATEGIE-BERICHT.md)
+schlupf_prozent = 0.02    # Marktorders und Stops werden um diesen Anteil schlechter ausgeführt
+spread_prozent = 0.05     # nur Backtest: Abstand zwischen Kauf- und Verkaufskurs insgesamt, in % vom Kurs
+
+[risiko]                  # Harte Regeln: jede Order muss sie bestehen, egal ob Strategie oder KI sie vorschlägt
+tagesverlust_max = 100.0          # Tagesverlustgrenze absolut; danach keine neuen Positionen bis zum nächsten Tag
+tagesverlust_max_prozent = 1.0    # Tagesverlustgrenze in % vom Gesamtwert (es gilt, was zuerst erreicht wird)
+tagesverlust_schliessen = true    # harte Grenze: bei Erreichen (realisiert plus unrealisiert) stellt der Autopilot alle
+                                  # EIGENEN Positionen glatt und sperrt neue bis zum nächsten Tag (false = nur sperren)
+position_max_prozent = 10.0       # Wert einer Position höchstens so viel % vom Gesamtwert
+positionen_max = 3                # höchstens so viele Positionen gleichzeitig
+orders_max_pro_tag = 20           # höchstens so viele Orders je Tag
+stop_loss_pflicht = true          # jede Eröffnung braucht einen Stop-Loss (nicht abschalten!)
+risiko_pro_trade_prozent = 0.5    # (Einstieg - Stop) mal Menge höchstens so viel % vom Gesamtwert
+short_erlaubt = false             # Leerverkäufe nur, wenn hier true
+kurs_max_alter_s = 60             # Kurs älter als so viele Sekunden: kein Handel
+keine_eroeffnung_min_vor_schluss = 15   # in den letzten Minuten vor Handelsschluss keine neuen Positionen
+standard_markt = "us"             # Markt für Symbole, die unter [maerkte] nicht stehen
+mengenschritt = 1.0               # kleinste handelbare Menge (Aktien 1, Krypto z. B. 0.0001)
+
+# Wechselkurse als Reserve, falls der Broker keinen liefert: Wert einer Einheit in Kontowährung (hier EUR).
+# Kurse in fremder Währung werden damit umgerechnet; ohne Kurs wird in fremder Währung nicht eröffnet.
+[wechselkurse]
+# USD = 0.92
+
+# Welches Symbol an welchem Markt gehandelt wird (Handelszeiten siehe unten). Beispiele:
+[maerkte]
+# SAP = "xetra"
+# XBTEUR = "krypto"
+
+# Mengenschritt je Symbol (überschreibt risiko.mengenschritt). Beispiel:
+[mengenschritte]
+# XBTEUR = 0.0001
+
+# Handelszeiten je Markt in Ortszeit der Börse. tage: 0 = Montag ... 6 = Sonntag.
+[handelszeiten.us]
+zeitzone = "America/New_York"
+von = "09:30"
+bis = "16:00"
+tage = [0, 1, 2, 3, 4]
+
+[handelszeiten.xetra]
+zeitzone = "Europe/Berlin"
+von = "09:00"
+bis = "17:30"
+tage = [0, 1, 2, 3, 4]
+
+[handelszeiten.krypto]
+immer = true              # rund um die Uhr
+
+[strategie]
+name = "ausbruch"         # "ausbruch" oder "vwap" (nur Beispiele, kein Erfolgsversprechen)
+
+[strategie.ausbruch]      # Eröffnungs-Ausbruch
+range_kerzen = 6          # so viele Kerzen nach Handelsbeginn bilden die Spanne
+crv = 2.0                 # Kursziel = Einstieg + crv mal Risiko
+min_breite_prozent = 0.2  # Spanne muss mindestens so breit sein (in % vom Kurs)
+
+[strategie.vwap]          # Rückkehr zum VWAP
+abstand_atr = 2.0         # Einstieg, wenn der Kurs so viele ATR vom VWAP entfernt ist
+stop_atr = 1.0            # Stop-Abstand in ATR
+atr_laenge = 14
+min_kerzen = 20           # mindestens so viele Kerzen am Tag, bevor gehandelt wird
+min_crv = 1.0             # Ziel (VWAP) muss mindestens so weit weg sein wie der Stop
+
+# Strategie "ki": die KI schätzt ein, der Autopilot handelt danach (nur Papierbetrieb zuerst, siehe LIESMICH.md, "KI handelt selbst").
+# Zum Einschalten  name = "ki"  oben setzen und ki.treiber auf "claude_cli" oder "anthropic" lassen. Die Werte sind die Standardwerte.
+# [strategie.ki]
+# horizont = "kurz"             # "kurz" (1-Tages-Einschätzung, Daytrading, Kerzen unter 1 Tag) oder "mittel" (3 Monate, Tageskerzen: autopilot.takt = "1d")
+# min_wahrscheinlichkeit = 0.6  # darunter kein Signal
+# abstand_min = 0               # so lange gilt eine Einschätzung (Minuten); 0 = automatisch: 30 bei Kerzen unter 1 Tag, 360 bei Tageskerzen
+# atr_laenge = 14
+# stop_atr = 1.5                # Stop-Abstand in ATR (bei "kurz" aus Stundenkerzen verdichtet)
+# ziel_atr = 3.0                # Ziel-Abstand in ATR = erwarteter Weg
+# kosten_faktor = 3.0           # der Weg zum Ziel muss die Kosten (Gebühren, Schlupf, Spread aus [kosten]) so oft enthalten
+# ausstieg_bei_umkehr = true    # dreht die KI mit Mindestwahrscheinlichkeit gegen die Position: schließen
+# kontext_takt = "auto"         # Kerzenlänge für die KI: auto (kurz: 1h, mittel: 1d), "" = wie geliefert, oder z. B. "4h"
+# max_aufrufe_pro_tag = 0       # 0 = unbegrenzt (Standard); eine Zahl begrenzt die KI-Aufrufe je Kalendertag
+# max_aufrufe = 0               # und insgesamt je Lauf (0 = unbegrenzt)
+
+[backtest]
+startkapital = 10000.0
+train_anteil = 0.7        # erster Teil der Daten zum Einstellen; der Rest bleibt zurückgehalten (Testteil)
+faltungen = 1             # Anzahl Walk-forward-Abschnitte im Testteil
+tage_pro_jahr = 252       # für das annualisierte Sharpe (Krypto: 365)
+tagesende_flat = true     # Daytrading: am Tagesende alles schließen
+kerzen_fenster = 500      # so viele Kerzen sieht die Strategie höchstens
+min_trades_training = 5   # Einstellungen mit weniger Trades im Training zählen nicht
+
+[journal.schwellen]       # Mindestbewegung in %, ab der eine Einschätzung als Treffer zählt
+"1h" = 0.3
+"4h" = 0.5
+"1d" = 1.0
+"1w" = 2.0
+"1M" = 4.0
+"3M" = 7.0
+"1J" = 12.0
+
+[autopilot]
+symbole = []              # z. B. ["AAPL", "MSFT"]
+takt = "5m"               # Kerzenlänge: 1m, 5m, 15m, 1h
+pause_s = 30              # Wartezeit zwischen zwei Durchläufen
+sicherheit_min = 0.0      # Signale mit geringerer Sicherheit (0-1) werden nur protokolliert; 0 = alle (gilt auch im Backtest)
+nur_daytrading = true     # vor Handelsschluss alles glattstellen
+tagesabschluss_min_vor_schluss = 5
+ohne_schutz = "schliessen"  # Position ohne Schutz-Stop: "schliessen" oder "warnen"
+fehler_max = 5            # so viele Fehler in Folge, dann bricht der Autopilot ab
+kerzen_fenster = 500
+
+[osiris]                  # Weltlage aus https://osirisai.live (Open Source, ohne Schlüssel)
+adresse = "https://osirisai.live"   # bei Selbst-Hosting deine Adresse
+pause_s = 1.5             # Pause zwischen zwei Feed-Abrufen (höflich)
+zeitlimit_s = 30          # je Abruf
+mindestabstand_s = 300    # jüngere Schnappschüsse werden nicht erneut geholt
+behalten_tage = 30        # ältere Schnappschüsse werden gelöscht
+automatisch = true        # die KI-Einschätzung holt veraltete Daten selbst
+
+[ki]                      # KI-Einschätzung kurz (1d) / mittel (3M) / lang (1J). Die KI sendet nie Orders.
+treiber = "claude_cli"    # "claude_cli" (lokale Claude-CLI, nutzt dein Abo), "anthropic" (API-Schlüssel) oder "aus"
+modell = "claude-sonnet-5-5"        # nur für "anthropic" (Schlüssel: ANTHROPIC_API_KEY oder ~/.config/kitrader/anthropic.env)
+anthropic_url = "https://api.anthropic.com/v1/messages"
+claude_befehl = "claude"  # Name oder Pfad der Claude-CLI
+claude_modell = "sonnet"  # Modell der Claude-CLI (--model): "sonnet", "opus" oder volle Modell-ID; "" = Standardmodell der CLI
+zeitlimit_s = 240
+kerzen_im_kontext = 30    # so viele letzte Kerzen stehen einzeln im Kontext
+historie_reihe = ""       # nicht mehr wirksam für den Muster-Abschnitt der KI (Muster-Engine); nur noch für den älteren Aufbau der Ereignisstudie
+osiris_max_alter_h = 6    # ältere OSIRIS-Daten werden neu geholt (wenn osiris.automatisch)
+filter = false            # Autopilot: Eröffnungssignal gegen die kurzfristige KI-Richtung verwerfen (Risikoprüfung gilt immer)
+filter_min_wahrscheinlichkeit = 0.55
+filter_max_alter_h = 6    # so lange gilt eine KI-Richtung für den Filter, dann wird neu gefragt
+
+[oberflaeche]             # Bedienoberfläche im Browser: python3 -m kitrader oberflaeche (nur auf diesem Rechner erreichbar)
+port = 8850
+browser_oeffnen = true    # beim Start den Browser öffnen
+live_takt = "5m"          # Kerzenlänge im Reiter "Live": 1m, 5m, 15m, 1h oder 1d
+live_kerzen = 96          # so viele Kerzen zeigt der Chart (20 bis 300)
+
+[zeitplan]                # nur für  python3 -m kitrader start  (alles in einem Befehl)
+morgenlage = "08:00"      # täglich zu dieser Uhrzeit die Morgenlage erstellen (HH:MM, Ortszeit von zeitzone); "" = aus
+zeitzone = "Europe/Berlin"
+osiris_alle_h = 6         # OSIRIS-Weltlage so oft neu holen (Stunden); 0 = aus
+nachrichten_alle_h = 2    # Nachrichten-Radar (45 Feeds und GDELT) so oft neu holen (Stunden); 0 = aus
+welt_alle_h = 2           # Welt-Rotation (Markt-Schnappschuss) so oft neu holen (Stunden); 0 = aus
+
+[watchlist]               # Werte der Morgenlage (python3 -m kitrader morgenlage; je Wert ein KI-Aufruf, wenn ein Treiber eingestellt ist) und des Reiters "Live"
+werte = ["BTC/EUR", "ETH/EUR"]    # auch kurz möglich: ["BTC", "Ethereum"] wird zu BTC/EUR und ETH/EUR (bei kursquelle = "kraken")
+
+[symbole]                 # Symbol-Eingabe (Befehle, Einstellungen, Oberfläche): BTC, Bitcoin, XBT/EUR ... -> BTC/EUR
+gegenwaehrung = "EUR"     # gilt, wenn die Eingabe keine Gegenwährung nennt (BTC -> BTC/EUR; mit "USD": BTC -> BTC/USD)
+
+[telegram]                # Meldungen und Not-Aus per Telegram. Token und Chat-ID gehören NICHT hierher,
+                          # sondern in ~/.config/kitrader/telegram.env (python3 -m kitrader telegram einrichten)
+aktiv = true              # Meldungen senden (nur wenn telegram.env eingerichtet ist)
+wache = false             # im Autopiloten mitlaufen und auf "stop" / "status" aus deinem Chat hören
+api_url = "https://api.telegram.org"
+zeitlimit_s = 10          # je Anfrage an Telegram
+poll_s = 25               # Wartezeit je Long-Polling-Anfrage der Wache
+max_alter_s = 600         # ältere Nachrichten ("stop" von gestern) lösen nichts mehr aus
+ablehnungen_alle_s = 600  # Ablehnungen der Risikoprüfung werden so lange gesammelt und zusammen gemeldet
+
+# Nachrichten-Radar (python3 -m kitrader nachrichten abrufen). Alles optional; ohne Angabe gilt die Standardliste im Code (45 Feeds).
+# [nachrichten]
+# gdelt = true              # GDELT-DOC-API mitnutzen (höchstens eine Anfrage alle 6 Sekunden)
+# pause_s = 0.7             # Pause zwischen zwei Feed-Abrufen
+# behalten_tage = 14        # ältere Meldungen werden gelöscht
+# gesperrte_domains = ["beispiel.example"]   # weitere Domains, deren GDELT-Treffer verworfen werden (zusätzlich zur eingebauten Liste der EU-Mediensanktionen)
+# quellen = [               # ersetzt die Standardliste ganz; nur offizielle RSS/Atom-Feeds
+#   { name = "tagesschau", url = "https://www.tagesschau.de/index~rss2.xml", region = "Deutschland", sprache = "de", gewicht = 1.0 },
+# ]
+
+# Welt-Rotation (python3 -m kitrader welt). Alles optional.
+# [welt]
+# kraken = ["BTC/EUR", "ETH/EUR"]   # Krypto-Tageskerzen von Kraken ([] = aus)
+# leitindizes = { Indien = "Nifty 50" }   # Leitindex je Region; der Index muss im Feed oder in `reihen` vorkommen
+# reihen = [                # Zusatzreihen aus dem Historie-Speicher (Tagesreihen); ersetzt die Standardliste
+#   { name = "Nifty 50", region = "Indien", klasse = "Aktien", reihe = "nifty50", art = "kurs" },
+# ]

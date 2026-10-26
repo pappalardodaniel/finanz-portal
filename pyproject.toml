@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kitrader"
+version = "0.1.0"
+description = "Private KI-Trading-Software: Daytrading mit Papier-, Demo- und Echtgeld-Betrieb, lange Kurshistorie und Ereignisliste"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+live = ["websockets>=12"]
+
+[project.scripts]
+kitrader = "kitrader.__main__:main"
+kitrader-markt = "kitrader.markt.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"*" = ["*.json", "*.toml", "*.md", "*.html"]
+"kitrader.markt" = [
+    "ui.css",
+    "dashboard/*.html", "dashboard/*.js",
+    "dashboard/static/charts/*", "dashboard/static/charts/lib/*",
+    "analysen/*.html",
+]

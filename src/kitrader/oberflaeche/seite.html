@@ -1,0 +1,1218 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="kitrader-schluessel" content="__SCHLUESSEL__">
+<title>kitrader</title>
+<style nonce="__NONCE__">
+:root {
+  --hg: #f4f5f7; --karte: #ffffff; --text: #1b1f24; --leise: #5b6572; --linie: #d8dce2;
+  --akzent: #1d4ed8; --gut: #137333; --gut-hg: #e2f4e7; --schlecht: #b3261e; --schlecht-hg: #fbe4e2;
+  --warn: #8a5300; --warn-hg: #fdf0d5; --papier: #1d4ed8; --demo: #8a5300; --echt: #b3261e;
+  --linie-chart: #1d4ed8; --marker: #8a5300; --long: #0b6e69; --short: #a3195b;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --hg: #12151a; --karte: #1b2027; --text: #e6e9ee; --leise: #9aa4b2; --linie: #343b46;
+    --akzent: #7aa2ff; --gut: #6fd18a; --gut-hg: #17301f; --schlecht: #ff8a80; --schlecht-hg: #3a1b19;
+    --warn: #f2b84b; --warn-hg: #3a2c10; --papier: #7aa2ff; --demo: #f2b84b; --echt: #ff8a80;
+    --linie-chart: #7aa2ff; --marker: #f2b84b; --long: #4fd1c5; --short: #ff7ac6;
+  }
+}
+:root[data-theme="dark"] {
+  --hg: #12151a; --karte: #1b2027; --text: #e6e9ee; --leise: #9aa4b2; --linie: #343b46;
+  --akzent: #7aa2ff; --gut: #6fd18a; --gut-hg: #17301f; --schlecht: #ff8a80; --schlecht-hg: #3a1b19;
+  --warn: #f2b84b; --warn-hg: #3a2c10; --papier: #7aa2ff; --demo: #f2b84b; --echt: #ff8a80;
+  --linie-chart: #7aa2ff; --marker: #f2b84b; --long: #4fd1c5; --short: #ff7ac6;
+}
+* { box-sizing: border-box; }
+a { color: var(--akzent); }
+body { margin: 0; background: var(--hg); color: var(--text); font: 15px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+header { position: sticky; top: 0; z-index: 5; background: var(--karte); border-bottom: 1px solid var(--linie);
+  display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; padding: 10px 16px; }
+header h1 { margin: 0; font-size: 20px; letter-spacing: .02em; }
+.modus { font-size: 26px; font-weight: 800; letter-spacing: .08em; padding: 4px 18px; border-radius: 8px; border: 3px solid currentColor; }
+.modus.papier { color: var(--papier); } .modus.demo { color: var(--demo); }
+.modus.echt { color: #fff; background: #c62828; border-color: #7f1d1d; animation: puls 2s infinite; }
+@keyframes puls { 50% { opacity: .75; } }
+.modus-info { color: var(--leise); font-size: 13px; }
+.abstand { flex: 1; }
+#notaus-knopf { background: #c62828; color: #fff; border: 3px solid #7f1d1d; border-radius: 10px; font-size: 20px; font-weight: 800;
+  padding: 10px 22px; cursor: pointer; letter-spacing: .05em; }
+#notaus-knopf:hover { background: #a61c1c; }
+#notaus-banner { display: none; background: #c62828; color: #fff; padding: 10px 16px; font-weight: 700; text-align: center; }
+#notaus-banner.an { display: block; }
+#verbindung { display: none; background: var(--warn-hg); color: var(--warn); padding: 8px 16px; text-align: center; font-weight: 600; }
+#verbindung.an { display: block; }
+nav { display: flex; flex-wrap: wrap; gap: 4px; padding: 10px 16px 0; border-bottom: 1px solid var(--linie); background: var(--hg); }
+nav button { background: none; border: 1px solid transparent; border-bottom: none; color: var(--leise); font: inherit; font-weight: 600;
+  padding: 8px 16px; border-radius: 8px 8px 0 0; cursor: pointer; }
+nav button[aria-selected="true"] { background: var(--karte); color: var(--text); border-color: var(--linie); margin-bottom: -1px; }
+main { padding: 16px; max-width: 1280px; margin: 0 auto; }
+section[hidden] { display: none; }
+.raster { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; margin-bottom: 16px; }
+.karte { background: var(--karte); border: 1px solid var(--linie); border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; overflow-x: auto; }
+.raster .karte { margin-bottom: 0; }
+.karte h2 { margin: 0 0 10px; font-size: 16px; }
+.karte h3 { margin: 14px 0 6px; font-size: 14px; }
+dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 16px; margin: 0; }
+dt { color: var(--leise); } dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 5px 8px; border-bottom: 1px solid var(--linie); vertical-align: top; }
+th { color: var(--leise); font-weight: 600; font-size: 13px; white-space: nowrap; }
+td.z, th.z { text-align: right; }
+.plus { color: var(--gut); } .minus { color: var(--schlecht); } .leise { color: var(--leise); }
+.chip { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.chip.ok { background: var(--gut-hg); color: var(--gut); } .chip.nah { background: var(--warn-hg); color: var(--warn); }
+.chip.erreicht, .chip.abgelehnt { background: var(--schlecht-hg); color: var(--schlecht); } .chip.info { background: var(--hg); color: var(--leise); }
+.balken { background: var(--hg); border-radius: 4px; height: 8px; min-width: 70px; overflow: hidden; }
+.balken span { display: block; height: 100%; background: var(--gut); }
+.balken.nah span { background: var(--warn); } .balken.erreicht span { background: var(--schlecht); }
+.meldung { padding: 10px 14px; border-radius: 8px; margin-bottom: 12px; font-weight: 600; }
+.meldung.warn { background: var(--warn-hg); color: var(--warn); } .meldung.fehler { background: var(--schlecht-hg); color: var(--schlecht); }
+.meldung.gut { background: var(--gut-hg); color: var(--gut); }
+pre.text { white-space: pre-wrap; word-break: break-word; margin: 0; font: 13px/1.5 ui-monospace, Menlo, Consolas, monospace; }
+.zeile { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: end; margin-bottom: 12px; }
+.zeile label { min-width: 0; max-width: 100%; }
+.zeile label select { width: 100%; }
+label { display: grid; gap: 3px; font-size: 13px; color: var(--leise); }
+input, select { max-width: 100%; font: inherit; padding: 6px 8px; border: 1px solid var(--linie); border-radius: 6px; background: var(--karte); color: var(--text); }
+input[type="checkbox"] { width: 18px; height: 18px; }
+label.haken { display: flex; align-items: center; gap: 6px; color: var(--text); }
+button.knopf { font: inherit; font-weight: 600; padding: 7px 16px; border-radius: 6px; border: 1px solid var(--akzent); background: var(--akzent); color: #fff; cursor: pointer; }
+html[data-theme="dark"] button.knopf:not(.leise) { color: #10131a; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) button.knopf:not(.leise) { color: #10131a; } }
+button.knopf:disabled { opacity: .55; cursor: wait; }
+button.knopf.leise { background: none; color: var(--akzent); }
+.klein { font-size: 13px; }
+svg.chart { width: 100%; height: auto; display: block; touch-action: pan-y; }
+svg.chart text { fill: var(--leise); font-size: 11px; }
+svg.chart .gitter { stroke: var(--linie); stroke-width: 1; }
+svg.chart .linie { fill: none; stroke: var(--linie-chart); stroke-width: 1.6; vector-effect: non-scaling-stroke; }
+svg.chart .ereignis { cursor: pointer; }
+svg.chart .ereignis rect.sicht { fill: var(--marker); }
+svg.chart .ereignis.gewaehlt rect.sicht { fill: var(--schlecht); }
+svg.chart .ereignis rect.treffer { fill: transparent; }
+svg.chart .wahl { stroke: var(--schlecht); stroke-dasharray: 4 3; stroke-width: 1; }
+svg.chart .fadenkreuz { stroke: var(--leise); stroke-width: 1; }
+svg.chart .punkt { fill: var(--linie-chart); }
+#chart-info { min-height: 1.4em; font-variant-numeric: tabular-nums; }
+.liste { max-height: 260px; overflow: auto; border: 1px solid var(--linie); border-radius: 6px; }
+.liste button { display: block; width: 100%; text-align: left; background: none; border: none; border-bottom: 1px solid var(--linie);
+  color: var(--text); font: inherit; padding: 5px 10px; cursor: pointer; }
+.liste button:hover, .liste button.gewaehlt { background: var(--hg); }
+.liste button.gewaehlt { font-weight: 700; }
+dialog { border: 3px solid #7f1d1d; border-radius: 12px; background: var(--karte); color: var(--text); max-width: 560px; width: calc(100% - 32px); padding: 20px; }
+dialog::backdrop { background: rgba(0, 0, 0, .55); }
+dialog h2 { margin-top: 0; color: var(--schlecht); }
+dialog .knoepfe { display: flex; gap: 12px; justify-content: flex-end; margin-top: 16px; flex-wrap: wrap; }
+dialog button.rot { background: #c62828; color: #fff; border: 2px solid #7f1d1d; font-weight: 800; padding: 9px 18px; border-radius: 8px; cursor: pointer; font-size: 15px; }
+dialog button.rot:disabled { opacity: .6; }
+ul.schritte { padding-left: 20px; margin: 8px 0; }
+ul.schritte li.fehler { color: var(--schlecht); font-weight: 700; }
+.nur-lesen { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+td.nowrap { white-space: nowrap; }
+.klammer { display: -webkit-box; -webkit-line-clamp: 6; -webkit-box-orient: vertical; overflow: hidden; }   /* lange Begründungen: höchstens 6 Zeilen, ganzer Text als Tooltip */
+td.text { min-width: 14em; }       /* lange Texte (Begründung, Gründe) nicht auf ein Wort Breite zusammendrücken */
+@media (max-width: 640px) { .modus { font-size: 20px; } #notaus-knopf { font-size: 17px; padding: 8px 14px; } main { padding: 10px; }
+  th, td { padding: 4px 5px; } .karte { padding: 12px; } .balkenspalte { display: none; } td.text { min-width: 22em; } }
+
+/* Reiter „Live“: Kerzenchart mit eigenen Trades */
+.live-kopf { display: flex; flex-wrap: wrap; gap: 4px 16px; align-items: baseline; margin-bottom: 6px; }
+.live-kopf h2 { margin: 0; }
+.live-preis { font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.live-zeile { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; margin: 6px 0; font-size: 13px; }
+.chip.long { color: var(--long); border: 1px solid var(--long); } .chip.short { color: var(--short); border: 1px solid var(--short); }
+.chip.ki { background: var(--hg); color: var(--text); border: 1px solid var(--linie); font-weight: 600; }
+svg.live { touch-action: pan-y; }
+svg.chart.schmal text { font-size: 15px; }
+svg.chart .kerze-auf { fill: var(--gut); stroke: var(--gut); } svg.chart .kerze-ab { fill: var(--schlecht); stroke: var(--schlecht); }
+svg.chart .docht { stroke-width: 1; vector-effect: non-scaling-stroke; }
+svg.chart .kerze-laufend { fill-opacity: .35; stroke-dasharray: 3 2; }
+svg.chart .stop-feld { fill: var(--schlecht); } svg.chart .ziel-feld { fill: var(--gut); }
+svg.chart text.feld-text { fill: #fff; font-weight: 700; }
+html[data-theme="dark"] svg.chart text.feld-text { fill: #10131a; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) svg.chart text.feld-text { fill: #10131a; } }
+svg.chart .preislinie { stroke: var(--akzent); stroke-width: 1; stroke-dasharray: 2 3; }
+svg.chart .preisfeld { fill: var(--akzent); } svg.chart text.preisfeld-text { fill: #fff; font-weight: 700; }
+html[data-theme="dark"] svg.chart text.preisfeld-text { fill: #10131a; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) svg.chart text.preisfeld-text { fill: #10131a; } }
+svg.chart .stop { stroke: var(--schlecht); stroke-width: 1.4; stroke-dasharray: 6 4; } svg.chart .ziel { stroke: var(--gut); stroke-width: 1.4; stroke-dasharray: 6 4; }
+svg.chart text.stop-text { fill: var(--schlecht); font-weight: 700; } svg.chart text.ziel-text { fill: var(--gut); font-weight: 700; }
+svg.chart .verbinder.long { stroke: var(--long); } svg.chart .verbinder.short { stroke: var(--short); }
+svg.chart .verbinder { stroke-width: 1.6; stroke-dasharray: 3 3; fill: none; }
+svg.chart .marke.long { fill: var(--long); stroke: var(--karte); stroke-width: 1.5; } svg.chart .marke.short { fill: var(--short); stroke: var(--karte); stroke-width: 1.5; }
+svg.chart .ausstieg.long { fill: var(--karte); stroke: var(--long); stroke-width: 2.4; } svg.chart .ausstieg.short { fill: var(--karte); stroke: var(--short); stroke-width: 2.4; }
+svg.chart text.ergebnis-plus { fill: var(--gut); font-weight: 700; } svg.chart text.ergebnis-minus { fill: var(--schlecht); font-weight: 700; }
+.legende { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 12px; color: var(--leise); margin: 6px 0 0; }
+.legende span::before { content: ""; display: inline-block; width: 12px; height: 0; border-top: 2px dashed currentColor; margin-right: 5px; vertical-align: middle; }
+.legende .l-stop { color: var(--schlecht); } .legende .l-ziel { color: var(--gut); }
+.legende .l-long::before { border-top-style: solid; border-color: var(--long); } .legende .l-long { color: var(--long); }
+.legende .l-short::before { border-top-style: solid; border-color: var(--short); } .legende .l-short { color: var(--short); }
+.ml-feld { margin: 0 0 8px; } .ml-feld > strong { display: block; font-size: 13px; color: var(--leise); }
+.ml-feld ul { margin: 2px 0 0; padding-left: 20px; } .ml-feld p { margin: 2px 0 0; }
+.ml-feld .ml-innen { margin-left: 12px; padding-left: 10px; border-left: 2px solid var(--linie); }
+
+/* Richtungspfeile (KI, Trends) */
+.pfeil { display: inline-block; font-weight: 800; font-size: 1.25em; line-height: 1; margin-right: 4px; }
+.pfeil.steigt { color: var(--gut); } .pfeil.faellt { color: var(--schlecht); } .pfeil.seitwaerts { color: var(--leise); }
+.chip.steigt { background: var(--gut-hg); color: var(--gut); } .chip.faellt { background: var(--schlecht-hg); color: var(--schlecht); }
+.chip.seitwaerts { background: var(--hg); color: var(--leise); border: 1px solid var(--linie); }
+.ki-karte h3 { margin: 0 0 4px; font-size: 14px; color: var(--leise); }
+.ki-karte .gross { font-size: 22px; font-weight: 800; margin-bottom: 6px; }
+.ki-karte .gross small { font-size: 14px; font-weight: 600; color: var(--leise); margin-left: 6px; }
+.ki-karte p { margin: 6px 0 0; } .ki-karte p b { color: var(--leise); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; display: block; }
+.wahr { background: var(--hg); border-radius: 4px; height: 8px; margin: 2px 0 8px; overflow: hidden; }
+.wahr span { display: block; height: 100%; background: var(--leise); } .wahr.steigt span { background: var(--gut); } .wahr.faellt span { background: var(--schlecht); }
+.ki-kopf { display: flex; flex-wrap: wrap; gap: 4px 16px; align-items: baseline; margin-bottom: 10px; }
+.ki-kopf h2 { margin: 0; }
+
+/* Trends: Gewinner und Verlierer farbig */
+td.w, th.w { text-align: right; white-space: nowrap; }
+td.w { font-weight: 600; }
+td.w.p1 { background: var(--gut-hg); color: var(--gut); } td.w.m1 { background: var(--schlecht-hg); color: var(--schlecht); }
+td.w.p2 { background: var(--gut); color: var(--karte); font-weight: 800; } td.w.m2 { background: var(--schlecht); color: var(--karte); font-weight: 800; }
+td.w.n { color: var(--leise); }
+.themen { list-style: none; margin: 0; padding: 0; }
+.themen li { padding: 8px 0; border-bottom: 1px solid var(--linie); }
+.themen li:last-child { border-bottom: none; }
+.themen .titel { font-weight: 600; }
+.chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.chip.neutral { background: var(--hg); color: var(--leise); border: 1px solid var(--linie); font-weight: 600; }
+.chip.markt { background: var(--warn-hg); color: var(--warn); }
+.rang { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin-top: 8px; }
+.rang h3 { margin: 0 0 4px; } .rang ul { list-style: none; margin: 0; padding: 0; font-variant-numeric: tabular-nums; }
+.rang li { display: flex; justify-content: space-between; gap: 8px; }
+.muster td small { display: block; color: var(--leise); font-weight: 400; }
+
+/* Order-Fenster (nur Papier) */
+.order-karte { border-width: 2px; border-color: var(--papier); }
+.order-karte h2 { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; }
+.order-karte .zeile input { width: 9.5em; }
+.order-karte .zeile select { width: auto; }
+.vorschau { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px 16px; margin: 8px 0; }
+.vorschau div { background: var(--hg); border-radius: 6px; padding: 6px 10px; }
+.vorschau small { display: block; color: var(--leise); font-size: 12px; } .vorschau b { font-variant-numeric: tabular-nums; }
+button.knopf.gefahr { background: var(--schlecht); border-color: var(--schlecht); }
+button.knopf.klein-knopf { padding: 3px 10px; font-size: 13px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>kitrader</h1>
+  <span id="modus" class="modus papier" aria-live="polite">...</span>
+  <span id="modus-info" class="modus-info"></span>
+  <span class="abstand"></span>
+  <button id="notaus-knopf" type="button">NOT-AUS</button>
+</header>
+<div id="notaus-banner" role="alert">NOT-AUS IST AKTIV: Es wird nichts mehr gehandelt. Aufheben nur am Rechner mit: python3 -m kitrader notaus --aufheben</div>
+<div id="verbindung" role="alert"></div>
+<nav role="tablist" aria-label="Bereiche">
+  <button role="tab" data-tab="uebersicht" aria-selected="true">Übersicht</button>
+  <button role="tab" data-tab="live" aria-selected="false">Live</button>
+  <button role="tab" data-tab="trends" aria-selected="false">Trends</button>
+  <button role="tab" data-tab="journal" aria-selected="false">Journal</button>
+  <button role="tab" data-tab="weltlage" aria-selected="false">Weltlage</button>
+  <button role="tab" data-tab="historie" aria-selected="false">Historie</button>
+  <button role="tab" data-tab="ki" aria-selected="false">KI</button>
+</nav>
+<main>
+  <section id="tab-uebersicht" role="tabpanel"></section>
+  <section id="tab-live" role="tabpanel" hidden></section>
+  <section id="tab-trends" role="tabpanel" hidden>
+    <div class="karte">
+      <h2>Trends</h2>
+      <div class="zeile">
+        <button class="knopf" id="tr-knopf" type="button">neu abrufen</button>
+        <button class="knopf leise" id="tr-neu" type="button">Anzeige aktualisieren</button>
+        <span id="tr-stand" class="leise klein"></span>
+      </div>
+      <div id="tr-meldung"></div>
+      <p class="leise klein">Was sich bewegt: Welt-Rotation, Nachrichten-Radar, die KI-Richtung der Watchlist und frühere, ähnliche Lagen. Das sind Zählungen und
+        Rückblicke aus öffentlichen Quellen, keine Prognose und kein Handelssignal. „Neu abrufen“ holt höflich und höchstens so oft, wie die Einstellung
+        <code>mindestabstand_s</code> erlaubt; die Nachrichten brauchen ein bis drei Minuten.</p>
+    </div>
+    <div id="tr-inhalt"></div>
+  </section>
+  <section id="tab-journal" role="tabpanel" hidden></section>
+  <section id="tab-weltlage" role="tabpanel" hidden>
+    <div class="karte">
+      <h2>Weltlage aus OSIRIS</h2>
+      <div class="zeile">
+        <button class="knopf" id="welt-knopf" type="button">neu abrufen</button>
+        <span id="welt-stand" class="leise"></span>
+      </div>
+      <div id="welt-meldung"></div>
+      <pre class="text" id="welt-text">Wird geladen ...</pre>
+      <p class="leise klein">Nur Fakten aus offenen Feeds von osirisai.live, keine Deutung. Abgerufen wird höflich, höchstens alle 5 Minuten.</p>
+    </div>
+  </section>
+  <section id="tab-historie" role="tabpanel" hidden>
+    <div class="karte">
+      <h2>Lange Reihen und Ereignisse</h2>
+      <div class="zeile">
+        <label>Reihe <select id="h-reihe"></select></label>
+        <label>von (Jahr) <input id="h-von" size="5" inputmode="numeric" placeholder="alle"></label>
+        <label>bis (Jahr) <input id="h-bis" size="5" inputmode="numeric" placeholder="alle"></label>
+        <label>Ereignisart <select id="h-art"><option value="">alle</option></select></label>
+        <label class="haken"><input type="checkbox" id="h-log" checked> logarithmisch</label>
+        <button class="knopf" id="h-los" type="button">anzeigen</button>
+      </div>
+      <div id="h-meldung"></div>
+      <div id="chart"></div>
+      <div id="chart-info" class="klein leise"></div>
+    </div>
+    <div class="raster">
+      <div class="karte"><h2>Ereignisse im Zeitraum</h2><div class="liste" id="h-liste"></div>
+        <p class="leise klein">Klick auf ein Ereignis (hier oder im Chart unten, die kleinen Striche) zeigt, was die Reihe danach tat.</p></div>
+      <div class="karte" id="h-studie"><h2>Ereignisstudie</h2><p class="leise">Noch kein Ereignis gewählt.</p></div>
+    </div>
+  </section>
+  <section id="tab-ki" role="tabpanel" hidden>
+    <div class="karte">
+      <h2>KI-Einschätzung</h2>
+      <div class="zeile">
+        <label>Aus der Watchlist <select id="ki-auswahl"></select></label>
+        <label>oder eigener Wert <input id="ki-wert" size="16" placeholder="z. B. BTC, Bitcoin, ETH/EUR" autocomplete="off" spellcheck="false"></label>
+        <label>Treiber <select id="ki-treiber"></select></label>
+        <button class="knopf" id="ki-knopf" type="button">Einschätzung anstoßen</button>
+        <span id="ki-status" class="leise"></span>
+      </div>
+      <div id="ki-erkannt" class="klein" aria-live="polite"></div>
+      <div id="ki-meldung"></div>
+      <div id="ki-ergebnis"></div>
+      <details id="ki-kontext" hidden><summary id="ki-kontext-titel">Kontext, den die KI bekommen hat</summary><pre class="text" id="ki-kontext-text"></pre></details>
+      <p class="leise klein">Die KI sendet nie Orders. Das kann einige Minuten dauern. Jede gültige Antwort kommt ins Journal und wird später gegen den echten Kurs ausgewertet.
+        Eine KI, die Text liest, hat keinen Informationsvorsprung vor dem Markt: Das ist ein Denkanstoß, keine Prognose.
+        Eingaben wie BTC, Bitcoin, XBT/EUR oder Ethereum werden zu BTC/EUR bzw. ETH/EUR erkannt; bei einem Tippfehler gibt es Vorschläge.</p>
+    </div>
+  </section>
+</main>
+
+<dialog id="notaus-dialog" aria-labelledby="nd-titel">
+  <h2 id="nd-titel">Not-Aus auslösen?</h2>
+  <div id="nd-text"></div>
+  <ul class="schritte" id="nd-schritte"></ul>
+  <div class="knoepfe">
+    <button type="button" class="knopf leise" id="nd-abbruch">Abbrechen</button>
+    <button type="button" class="rot" id="nd-ja">JA, NOT-AUS JETZT</button>
+  </div>
+</dialog>
+
+<script nonce="__NONCE__">
+(() => {
+'use strict';
+const SCHLUESSEL = document.querySelector('meta[name="kitrader-schluessel"]').content;
+const $ = (s, wurzel = document) => wurzel.querySelector(s);
+const SVGNS = 'http://www.w3.org/2000/svg';
+let INFO = null;
+
+// ---------- Hilfen: Elemente nur mit textContent bauen (fremde Texte wie Meldungen werden nie als HTML gelesen)
+function h(tag, attr, ...kinder) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attr || {})) {
+    if (v == null || v === false) continue;
+    if (k === 'class') e.className = v;
+    else if (k.startsWith('on')) e.addEventListener(k.slice(2), v);
+    else e.setAttribute(k, v === true ? '' : v);
+  }
+  for (const kind of kinder.flat()) if (kind != null && kind !== false) e.append(kind.nodeType ? kind : String(kind));
+  return e;
+}
+function svg(tag, attr, ...kinder) {
+  const e = document.createElementNS(SVGNS, tag);
+  for (const [k, v] of Object.entries(attr || {})) if (v != null) e.setAttribute(k, v);
+  for (const kind of kinder) if (kind != null) e.append(kind.nodeType ? kind : String(kind));
+  return e;
+}
+const leeren = (e, ...neu) => { e.replaceChildren(...neu.flat().filter(x => x != null)); return e; };
+const zahl = (x, n = 2) => x == null ? '–' : Number(x).toLocaleString('de-DE', { minimumFractionDigits: n, maximumFractionDigits: n });
+const kurzzahl = x => x == null ? '–' : Number(x).toLocaleString('de-DE', { maximumFractionDigits: 8 });
+const prozent = (x, n = 1) => x == null ? '–' : (x >= 0 ? '+' : '') + zahl(x * 100, n) + ' %';
+const vorzeichen = x => x == null ? '' : (x > 0 ? 'plus' : x < 0 ? 'minus' : '');
+const zeit = s => s ? String(s).replace('T', ' ').slice(0, 19) : '–';
+const meldung = (art, text) => h('div', { class: 'meldung ' + art, role: art === 'fehler' ? 'alert' : null }, text);
+
+async function api(pfad, optionen = {}) {
+  const kopf = { 'X-Kitrader-Schluessel': SCHLUESSEL };
+  let koerper;
+  if (optionen.post) { kopf['Content-Type'] = 'application/json'; koerper = JSON.stringify(optionen.daten || {}); }
+  let antwort;
+  try {
+    antwort = await fetch(pfad, { method: optionen.post ? 'POST' : 'GET', headers: kopf, body: koerper, cache: 'no-store' });
+  } catch (e) {
+    verbindung('Keine Verbindung zur Oberfläche. Läuft sie noch? (Fenster im Terminal prüfen)');
+    throw new Error('Keine Verbindung');
+  }
+  let daten = {};
+  try { daten = await antwort.json(); } catch (e) { /* leere Antwort */ }
+  if (antwort.status === 403) verbindung('Anfrage abgelehnt (' + (daten.fehler || '403') + '). Bitte diese Seite neu laden.');
+  else verbindung('');
+  if (!antwort.ok) throw new Error(daten.fehler || ('Fehler ' + antwort.status));
+  return daten;
+}
+function verbindung(text) { const e = $('#verbindung'); e.textContent = text; e.classList.toggle('an', !!text); }
+
+// ---------- Kopf: Betriebsart und Not-Aus-Stand
+function kopfAktualisieren(u) {
+  const m = $('#modus');
+  m.textContent = u.modus_text;
+  m.className = 'modus ' + u.modus;
+  $('#modus-info').textContent = u.echtes_geld ? 'ECHTES GELD' : (u.modus === 'demo' ? 'Demokonto, kein echtes Geld' : 'Simulation, kein echtes Geld');
+  $('#notaus-banner').classList.toggle('an', !!u.notaus.aktiv);
+}
+
+// ---------- Reiter
+const REITER = ['uebersicht', 'live', 'trends', 'journal', 'weltlage', 'historie', 'ki'];
+const geladen = {};
+function reiter(name) {
+  if (!REITER.includes(name)) name = 'uebersicht';
+  for (const b of document.querySelectorAll('nav button')) b.setAttribute('aria-selected', String(b.dataset.tab === name));
+  for (const r of REITER) $('#tab-' + r).hidden = r !== name;
+  try { history.replaceState(null, '', '#' + name); } catch (e) { /* egal */ }
+  const lader = { uebersicht: ladeUebersicht, live: ladeLive, trends: ladeTrends, journal: ladeJournal, weltlage: ladeWeltlage, historie: initHistorie, ki: initKI }[name];
+  lader().catch(() => {});
+}
+const aktuellerReiter = () => (document.querySelector('nav button[aria-selected="true"]') || {}).dataset?.tab;
+
+// ---------- Übersicht
+async function ladeUebersicht(nurKopf = false) {
+  const wurzel = $('#tab-uebersicht');
+  let u;
+  try { u = await api('/api/uebersicht'); }
+  catch (e) { if (!nurKopf) leeren(wurzel, meldung('fehler', 'Übersicht nicht ladbar: ' + e.message)); return; }
+  kopfAktualisieren(u);
+  if (nurKopf) return;
+  const teile = [];
+  if (u.echtes_geld) teile.push(meldung('fehler', 'Betriebsart ECHT: Alles hier bezieht sich auf ECHTES GELD.'));
+  if (u.freigabe) teile.push(meldung(u.freigabe.ok ? 'gut' : 'warn', u.freigabe.text));
+  for (const w of u.warnungen) teile.push(meldung('warn', w));
+  for (const f of u.fehler) teile.push(meldung('fehler', f));
+  if (u.tag_gesperrt) teile.push(meldung('warn', 'Tagesverlustgrenze erreicht: Heute werden keine neuen Positionen eröffnet.'));
+
+  const k = u.konto;
+  const konto = h('div', { class: 'karte' }, h('h2', null, 'Konto'),
+    k ? h('dl', null,
+      h('dt', null, 'Gesamtwert'), h('dd', null, zahl(k.gesamtwert) + ' ' + k.waehrung),
+      h('dt', null, 'Guthaben (bar)'), h('dd', null, zahl(k.guthaben) + ' ' + k.waehrung),
+      h('dt', null, 'Kaufkraft'), h('dd', null, zahl(k.kaufkraft) + ' ' + k.waehrung),
+      h('dt', null, 'Ergebnis heute'), h('dd', { class: vorzeichen(k.tagesergebnis) }, zahl(k.tagesergebnis) + ' ' + k.waehrung),
+      h('dt', null, 'Herkunft Ergebnis'), h('dd', { class: 'leise klein' }, k.tagesergebnis_quelle))
+      : h('p', { class: 'leise' }, 'Kein Kontostand verfügbar.'),
+    h('p', { class: 'leise klein' }, 'Stand ' + zeit(u.stand) + ' UTC · Broker: ' + u.broker + (k && k.simulation ? ' (Simulation)' : '')));
+
+  const grenzen = h('div', { class: 'karte' }, h('h2', null, 'Risikogrenzen'),
+    h('table', null, h('thead', null, h('tr', null, h('th', null, 'Regel'), h('th', { class: 'z' }, 'jetzt'), h('th', { class: 'z' }, 'Grenze'), h('th', { class: 'balkenspalte' }, 'Auslastung'), h('th', null, 'Stand'))),
+      h('tbody', null, u.grenzen.map(g => h('tr', { title: g.hinweis || null },
+        h('td', null, g.name), h('td', { class: 'z' }, g.aktuell), h('td', { class: 'z' }, g.grenze),
+        h('td', { class: 'balkenspalte' }, g.anteil == null ? '' : (() => { const b = h('div', { class: 'balken ' + g.status }, h('span')); b.firstChild.style.width = Math.round(Math.min(1, Math.max(0, g.anteil)) * 100) + '%'; return b; })()),
+        h('td', null, h('span', { class: 'chip ' + g.status }, ({ ok: 'ok', nah: 'nah dran', erreicht: 'erreicht', info: 'Einstellung' })[g.status] || g.status)))))));
+
+  const positionen = h('div', { class: 'karte' }, h('h2', null, 'Offene Positionen (' + u.positionen.length + ')'),
+    u.positionen.length ? h('table', null, h('thead', null, h('tr', null, ['Symbol', 'Richtung'].map(t => h('th', null, t)), ['Menge', 'Einstand', 'Kurs', 'Ergebnis'].map(t => h('th', { class: 'z' }, t)))),
+      h('tbody', null, u.positionen.map(p => h('tr', null, h('td', null, p.symbol), h('td', null, p.richtung), h('td', { class: 'z' }, kurzzahl(p.menge)),
+        h('td', { class: 'z' }, zahl(p.einstand, 4)), h('td', { class: 'z' }, zahl(p.kurs, 4)), h('td', { class: 'z ' + vorzeichen(p.ergebnis) }, zahl(p.ergebnis))))))
+      : h('p', { class: 'leise' }, 'Keine offenen Positionen.'));
+
+  const orders = h('div', { class: 'karte' }, h('h2', null, 'Offene Orders (' + u.orders.length + ')'),
+    u.orders.length ? h('table', null, h('thead', null, h('tr', null, ['Nr', 'Symbol', 'Seite', 'Art'].map(t => h('th', null, t)), ['Menge', 'Limit', 'Stop'].map(t => h('th', { class: 'z' }, t)), h('th', null, 'Hinweis'))),
+      h('tbody', null, u.orders.map(o => h('tr', null, h('td', null, o.id), h('td', null, o.symbol), h('td', null, o.seite), h('td', null, o.art),
+        h('td', { class: 'z' }, kurzzahl(o.menge)), h('td', { class: 'z' }, zahl(o.limit, 4)), h('td', { class: 'z' }, zahl(o.stop, 4)), h('td', { class: 'leise nowrap' }, o.hinweis)))))
+      : h('p', { class: 'leise' }, 'Keine offenen Orders.'));
+
+  const protokoll = h('div', { class: 'karte' }, h('h2', null, 'Letzte Ereignisse des Autopiloten'),
+    u.protokoll.length ? h('table', null, h('tbody', null, u.protokoll.map(e => h('tr', null, h('td', { class: 'leise nowrap' }, zeit(e.zeit)), h('td', null, h('span', { class: 'chip info' }, e.art)), h('td', null, e.text)))))
+      : h('p', { class: 'leise' }, 'Noch nichts protokolliert.'));
+
+  const lage = await api('/api/morgenlage').catch(() => null);
+  leeren(wurzel, teile, morgenlageKarte(lage), h('div', { class: 'raster' }, konto, grenzen), positionen, orders, protokoll);
+}
+
+// ---------- Morgenlage (morgenlage.json aus dem Datenordner; die Form schreibt lage.py, hier wird sie nur als Text gezeigt)
+const schluesselText = k => { const t = String(k).replace(/_/g, ' '); return t.charAt(0).toUpperCase() + t.slice(1); };
+function jsonAnzeige(x, tiefe = 0) {          // gibt immer eine Liste von Elementen zurück
+  if (x == null || x === '') return [];
+  if (typeof x !== 'object') return [h('p', null, typeof x === 'number' ? kurzzahl(x) : String(x))];
+  if (tiefe >= 4) return [h('p', { class: 'leise' }, '…')];
+  if (Array.isArray(x)) {
+    const teile = x.slice(0, 15);
+    const mehr = x.length > teile.length ? [h('p', { class: 'leise klein' }, '… und ' + (x.length - teile.length) + ' weitere')] : [];
+    if (teile.every(e => e == null || typeof e !== 'object'))
+      return [h('ul', null, teile.map(e => h('li', null, typeof e === 'number' ? kurzzahl(e) : String(e ?? '')))), ...mehr];
+    return [...teile.map(e => h('div', { class: 'ml-innen' }, jsonAnzeige(e, tiefe + 1))), ...mehr];
+  }
+  return Object.entries(x).filter(([, v]) => v != null && v !== '' && !(Array.isArray(v) && !v.length)).map(([k, v]) =>
+    h('div', { class: 'ml-feld' }, h('strong', null, schluesselText(k)), h('div', { class: typeof v === 'object' ? 'ml-innen' : null }, jsonAnzeige(v, tiefe + 1))));
+}
+function morgenlageV1(m) {                    // Aufbau von morgenlage.json, Version 1 (lage.py)
+  const tageText = { 1: '1 Tag', 7: '7 Tage', 30: '30 Tage' };
+  const kerzenWort = m.takt === '1d' ? n => tageText[n] || n + ' Tage' : n => n + ' Kerzen';
+  const aend = (e, n) => { const v = e.aenderung_prozent ? e.aenderung_prozent[String(n)] : null; return h('td', { class: 'z ' + vorzeichen(v) }, v == null ? '–' : (v >= 0 ? '+' : '') + zahl(v, 1) + ' %'); };
+  const prog = (e, name) => { const p = e.prognosen ? e.prognosen[name] : null;
+    return h('td', { title: p ? p.begruendung : null }, p ? h('span', { class: 'chip ki' }, (RICHTUNG_TEXT[p.richtung] || p.richtung) + ' ' + Math.round(p.wahrscheinlichkeit * 100) + ' %') : '–'); };
+  const tabelle = (m.werte || []).length ? h('table', null,
+    h('thead', null, h('tr', null, h('th', null, 'Wert'), h('th', { class: 'z' }, 'Preis'), [1, 7, 30].map(n => h('th', { class: 'z' }, kerzenWort(n))), ['kurz (1 Tag)', 'mittel (3 Monate)', 'lang (1 Jahr)'].map(x => h('th', null, x)))),
+    h('tbody', null, m.werte.flatMap(e => [h('tr', null, h('td', null, e.wert), h('td', { class: 'z' }, preisText(e.preis)), aend(e, 1), aend(e, 7), aend(e, 30), prog(e, 'kurz'), prog(e, 'mittel'), prog(e, 'lang')),
+      e.fehler ? h('tr', null, h('td', { colspan: 8, class: 'minus klein' }, e.wert + ': ' + e.fehler)) : null]))) : null;
+  const o = m.osiris;
+  const quote = m.trefferquote ? Object.entries(m.trefferquote).map(([hz, q]) => (HORIZONT_TEXT[hz] || hz) + ': ' + (q.n ? Math.round(q.quote) + ' % von ' + q.n : 'noch keine ausgewerteten Fälle')).join(' · ') : '';
+  return [tabelle,
+    o && o.veraenderung ? h('details', null, h('summary', null, 'Weltlage (OSIRIS): was sich seit dem vorigen Stand geändert hat'), h('pre', { class: 'text' }, o.veraenderung)) : null,
+    quote ? h('p', { class: 'leise klein' }, 'Bisherige Trefferquote der KI-Einschätzungen – ' + quote + '. Mit wenigen Fällen ist sie Zufall.') : null,
+    m.hinweis ? h('p', { class: 'leise klein' }, m.hinweis) : null];
+}
+function morgenlageKarte(ml) {
+  if (!ml || (!ml.vorhanden && !ml.fehler)) return null;
+  const alter = ml.alter_h == null ? '' : ml.alter_h < 1 ? 'vor weniger als einer Stunde' : 'vor ' + zahl(ml.alter_h, 1) + ' Std.';
+  const m = ml.vorhanden ? ml.daten : null;
+  return h('div', { class: 'karte' }, h('h2', null, 'Morgenlage'),
+    h('p', { class: 'leise klein' }, 'Stand ' + zeit(ml.stand) + ' UTC (' + alter + ') · aus morgenlage.json · eine Zusammenfassung zum Nachdenken, kein Handelssignal'),
+    ml.fehler ? meldung('warn', ml.fehler) : null,
+    m && m.version === 1 && Array.isArray(m.werte) ? morgenlageV1(m) : (m ? jsonAnzeige(m) : null));
+}
+
+// ---------- Live: Kerzenchart je Symbol mit eigenen Trades und der letzten KI-Einschätzung (alles nur Lesen)
+const live = { info: null, takt: null, laeuft: false, stand: null };
+const HORIZONT_TEXT = { '1d': '1 Tag', '3M': '3 Monate', '1J': '1 Jahr' };
+const RICHTUNG_TEXT = { steigt: '▲ steigt', faellt: '▼ fällt', seitwaerts: '▬ seitwärts' };
+const preisText = v => v == null ? '–' : Number(v).toLocaleString('de-DE', { minimumFractionDigits: v >= 10 ? 2 : 4, maximumFractionDigits: v >= 10 ? 2 : 4 });
+const ortszeit = (s, mitDatum = false) => { const d = new Date(s * 1000); return (mitDatum ? d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' }) + ' ' : '') + d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }); };
+const liveId = i => 'live-karte-' + i;
+
+async function ladeLive() {
+  if (live.laeuft) return;
+  live.laeuft = true;
+  const wurzel = $('#tab-live');
+  try {
+    if (!live.info) {
+      live.info = await api('/api/live/symbole');
+      live.takt = live.info.takt;
+      liveRahmen(wurzel);
+    }
+    await Promise.all([...live.info.symbole.map((s, i) => liveSymbol(s, i)), orderPositionen()]);
+    live.stand = new Date();
+    const st = $('#live-stand');
+    if (st) st.textContent = 'Aktualisiert ' + live.stand.toLocaleTimeString('de-DE') + ' · alle ' + live.info.aktualisierung_s + ' Sekunden';
+  } catch (e) {
+    live.info = null;
+    leeren(wurzel, meldung('fehler', 'Live nicht ladbar: ' + e.message));
+  } finally { live.laeuft = false; }
+}
+function liveRahmen(wurzel) {
+  const auswahl = h('select', { id: 'live-takt', 'aria-label': 'Kerzenlänge' }, live.info.takte.map(t => h('option', { value: t }, t)));
+  auswahl.value = live.takt;
+  auswahl.addEventListener('change', () => { live.takt = auswahl.value; ladeLive().catch(() => {}); });
+  const kopf = h('div', { class: 'zeile' }, h('label', null, 'Kerzenlänge', auswahl),
+    h('button', { class: 'knopf leise', type: 'button', onclick: () => ladeLive().catch(() => {}) }, 'jetzt aktualisieren'),
+    h('span', { id: 'live-stand', class: 'leise klein' }, 'Wird geladen ...'));
+  const karten = live.info.symbole.length
+    ? live.info.symbole.map((s, i) => h('div', { class: 'karte', id: liveId(i) }, h('h2', null, s), h('p', { class: 'leise' }, 'Wird geladen ...')))
+    : [meldung('warn', 'Keine Symbole eingestellt. In den Einstellungen autopilot.symbole oder [watchlist] werte eintragen, z. B. ["BTC/EUR"].')];
+  leeren(wurzel, kopf, orderKarte(), karten,
+    h('p', { class: 'leise klein' }, 'Kurse und Kerzen von der eingestellten Kursquelle (' + live.info.kursquelle + '), Zeiten in der Ortszeit dieses Browsers. Eigene Trades aus dem ' +
+      (live.info.modus === 'papier' ? 'Papierkonto' : 'Journal') + ', KI-Einschätzungen aus dem Journal. Orders setzt diese Seite nur im Papierbetrieb (Order-Fenster oben, mit Risikoprüfung); '
+      + 'die letzte Kerze im Chart ist noch nicht abgeschlossen.'));
+}
+
+// ---------- Order-Fenster (nur Papierbetrieb): Vorschau mit Risikoprüfung, dann Absenden; offene Positionen mit „Schließen“
+const orderZustand = { vorschau: null, offeneBestaetigung: null };
+function orderKarte() {
+  const o = live.info.order || { erlaubt: false, hinweis: 'Order-Fenster nicht verfügbar.' };
+  const karte = h('div', { class: 'karte order-karte', id: 'order-karte' });
+  if (!o.erlaubt) {
+    leeren(karte, h('h2', null, 'Order setzen'), meldung('warn', o.hinweis || 'Das Order-Fenster ist in dieser Betriebsart gesperrt.'),
+      h('p', { class: 'leise klein' }, 'Die Oberfläche setzt nur im Papierbetrieb (Simulation, kein echtes Geld) Orders von Hand.'));
+    return karte;
+  }
+  const symbole = live.info.symbole;
+  const wahl = (id, titel, inhalt) => h('label', null, titel, inhalt);
+  const sym = h('select', { id: 'o-symbol' }, symbole.map(s => h('option', { value: s }, s)));
+  const richtung = h('select', { id: 'o-richtung' }, h('option', { value: 'kaufen' }, 'Kaufen (long)'), h('option', { value: 'short' }, 'Short (leerverkaufen)'));
+  const art = h('select', { id: 'o-art' }, h('option', { value: 'eur' }, 'Betrag in ' + (o.waehrung || 'EUR')), h('option', { value: 'stueck' }, 'Stückzahl'));
+  const feld = (id, platz, label, pflicht) => h('label', null, label + (pflicht ? ' *' : ''), h('input', { id, inputmode: 'decimal', autocomplete: 'off', placeholder: platz, spellcheck: 'false' }));
+  const zeile = h('div', { class: 'zeile' }, wahl('o-symbol', 'Symbol', sym), wahl('o-richtung', 'Richtung', richtung), wahl('o-art', 'Menge als', art),
+    feld('o-betrag', 'z. B. 500', 'Betrag / Stück', true), feld('o-stop', 'Preis', 'Stop-Loss', true), feld('o-ziel', 'Preis, optional', 'Ziel (Take-Profit)', false),
+    h('button', { class: 'knopf', id: 'o-vorschau', type: 'button' }, 'Vorschau und Risikoprüfung'),
+    h('button', { class: 'knopf', id: 'o-senden', type: 'button', disabled: true }, 'Order absenden (Papier)'));
+  leeren(karte, h('h2', null, 'Order setzen', h('span', { class: 'chip info' }, 'PAPIER – kein echtes Geld')),
+    h('p', { class: 'leise klein' }, 'Jede Order geht durch dieselbe Risikoprüfung wie beim Autopiloten (Kurs frisch, Handelszeit, Not-Aus, Tagesverlust, Stop-Pflicht, Risiko je Trade ≤ ' +
+      zahl(o.risiko_pro_trade_prozent, 2) + ' % des Gesamtwerts, Position ≤ ' + zahl(o.position_max_prozent, 1) + ' %, höchstens ' + o.positionen_max + ' Positionen' +
+      (o.short_erlaubt ? '' : ', Short ist in den Einstellungen nicht erlaubt') + '). Stop-Loss ist Pflicht. * Pflichtfeld.'),
+    zeile, h('div', { id: 'o-ergebnis', 'aria-live': 'polite' }), h('h3', null, 'Offene Positionen'), h('div', { id: 'o-positionen' }, h('p', { class: 'leise' }, 'Wird geladen ...')));
+  for (const id of ['o-symbol', 'o-richtung', 'o-art', 'o-betrag', 'o-stop', 'o-ziel'])
+    karte.querySelector('#' + id).addEventListener('input', orderEingabeGeaendert);
+  karte.querySelector('#o-vorschau').addEventListener('click', () => orderSenden('vorschau'));
+  karte.querySelector('#o-senden').addEventListener('click', () => orderSenden('senden'));
+  return karte;
+}
+function orderDaten() {
+  const w = id => document.getElementById(id).value.trim();
+  return { symbol: w('o-symbol'), richtung: w('o-richtung'), betrag_art: w('o-art'), betrag: w('o-betrag'), stop: w('o-stop'), ziel: w('o-ziel') };
+}
+function orderPflicht() {
+  const d = orderDaten();
+  if (!d.betrag) return (d.betrag_art === 'eur' ? 'Bitte einen Betrag eintragen.' : 'Bitte eine Stückzahl eintragen.');
+  if (!d.stop) return 'Der Stop-Loss ist Pflicht: Bitte einen Stop-Preis eintragen (bei Kaufen unter, bei Short über dem Kurs).';
+  return '';
+}
+function orderEingabeGeaendert() {
+  orderZustand.vorschau = null;
+  const senden = document.getElementById('o-senden');
+  if (senden) senden.disabled = true;
+  const erg = document.getElementById('o-ergebnis');
+  if (erg && erg.dataset.art === 'vorschau') leeren(erg, h('p', { class: 'leise klein' }, 'Eingaben geändert: bitte neu prüfen.'));
+}
+function orderVorschauAnzeige(v) {
+  const W = v.waehrung, K = v.kurs_waehrung;
+  const feld = (titel, wert) => h('div', null, h('small', null, titel), h('b', null, wert));
+  return [
+    h('div', { class: 'vorschau' },
+      feld('Kurs-Einstieg (' + (v.seite === 'kauf' ? 'Kauf/Ask' : 'Verkauf/Bid') + ')', preisText(v.preis) + ' ' + K),
+      feld('Menge', kurzzahl(v.menge) + ' Stück'),
+      feld('Wert', zahl(v.wert) + ' ' + W + (v.position_prozent != null ? ' (' + zahl(v.position_prozent, 1) + ' % des Kontos)' : '')),
+      feld('Risiko bis zum Stop', zahl(v.risiko) + ' ' + W + (v.risiko_prozent != null ? ' (' + zahl(v.risiko_prozent, 2) + ' %)' : '')),
+      feld('Grenze Risiko je Trade', zahl(v.risiko_max) + ' ' + W),
+      feld('Stop-Loss', preisText(v.stop)),
+      feld('Ziel', v.ziel != null ? preisText(v.ziel) + (v.crv != null ? ' (Chance:Risiko ' + zahl(v.crv, 1) + ':1)' : '') : '–'),
+      feld('Gebühr ca.', zahl(v.gebuehr_ca) + ' ' + W + ' je Ausführung')),
+    v.ok ? meldung('gut', 'Risikoprüfung bestanden. Mit „Order absenden“ wird sie auf dem Papier ausgeführt.')
+         : [meldung('fehler', 'Risikoprüfung: abgelehnt'), h('ul', { class: 'schritte' }, v.gruende.map(g => h('li', { class: 'fehler' }, g)))]];
+}
+async function orderSenden(art) {
+  const erg = document.getElementById('o-ergebnis'), vorschauKnopf = document.getElementById('o-vorschau'), sendenKnopf = document.getElementById('o-senden');
+  const fehlt = orderPflicht();
+  if (fehlt) { erg.dataset.art = 'pflicht'; leeren(erg, meldung('warn', fehlt)); sendenKnopf.disabled = true; return; }
+  vorschauKnopf.disabled = true; sendenKnopf.disabled = true;
+  leeren(erg, h('p', { class: 'leise' }, art === 'vorschau' ? 'Hole den Kurs und prüfe ...' : 'Sende auf dem Papier ...'));
+  erg.dataset.art = art;
+  try {
+    const d = await api('/api/order/' + art, { post: true, daten: orderDaten() });
+    if (art === 'vorschau') {
+      orderZustand.vorschau = d;
+      leeren(erg, ...orderVorschauAnzeige(d));
+      sendenKnopf.disabled = !d.ok;
+    } else {
+      const kopf = d.ausgefuehrt ? meldung('gut', 'Ausgeführt (Papier): ' + (d.richtung === 'short' ? 'Short ' : 'Kauf ') + kurzzahl(d.menge) + ' ' + d.symbol + ' @ ' + preisText(d.ausgefuehrter_preis) +
+            ', Stop ' + preisText(d.stop) + (d.ziel != null ? ', Ziel ' + preisText(d.ziel) : '') + '. Im Journal als „manuell“ vermerkt (Nr. ' + d.journal_id + ').')
+        : d.ok ? meldung('warn', 'Order angenommen, Status: ' + d.status + '.')
+        : [meldung('fehler', 'NICHT ausgeführt. Risikoprüfung bzw. Broker haben abgelehnt (im Journal vermerkt, Nr. ' + d.journal_id + '):'),
+           h('ul', { class: 'schritte' }, d.gruende.map(g => h('li', { class: 'fehler' }, g)))];
+      leeren(erg, ...[kopf].flat());
+      orderZustand.vorschau = null;
+      await orderPositionen();
+      ladeUebersicht(true).catch(() => {});
+      live.info && Promise.all(live.info.symbole.map((s, i) => liveSymbol(s, i))).catch(() => {});
+    }
+  } catch (e) { leeren(erg, meldung('fehler', e.message)); }
+  vorschauKnopf.disabled = false;
+}
+async function orderPositionen() {
+  const ziel = document.getElementById('o-positionen');
+  if (!ziel) return;
+  let u;
+  try { u = await api('/api/uebersicht'); } catch (e) { leeren(ziel, meldung('warn', 'Positionen nicht lesbar: ' + e.message)); return; }
+  if (!u.positionen.length) { leeren(ziel, h('p', { class: 'leise' }, 'Keine offenen Positionen.')); return; }
+  leeren(ziel, h('table', null,
+    h('thead', null, h('tr', null, ['Symbol', 'Richtung'].map(t => h('th', null, t)), ['Menge', 'Einstand', 'Kurs', 'Ergebnis'].map(t => h('th', { class: 'z' }, t)), h('th'))),
+    h('tbody', null, u.positionen.map(p => h('tr', null, h('td', null, p.symbol), h('td', null, h('span', { class: 'chip ' + p.richtung }, p.richtung)),
+      h('td', { class: 'z' }, kurzzahl(p.menge)), h('td', { class: 'z' }, preisText(p.einstand)), h('td', { class: 'z' }, preisText(p.kurs)),
+      h('td', { class: 'z ' + vorzeichen(p.ergebnis) }, p.ergebnis == null ? '–' : zahl(p.ergebnis) + ' ' + (p.waehrung || '')),
+      h('td', null, schliessenKnopf(p.symbol)))))));
+}
+function schliessenKnopf(symbol) {
+  const k = h('button', { class: 'knopf leise klein-knopf', type: 'button' }, 'Schließen');
+  let zurueck = null;
+  k.addEventListener('click', async () => {
+    if (!k.dataset.sicher) {                       // erster Klick fragt nach, zweiter schließt
+      k.dataset.sicher = '1'; k.textContent = 'Wirklich schließen?'; k.classList.add('gefahr');
+      zurueck = setTimeout(() => { delete k.dataset.sicher; k.textContent = 'Schließen'; k.classList.remove('gefahr'); }, 6000);
+      return;
+    }
+    clearTimeout(zurueck); k.disabled = true; k.textContent = 'schließe ...';
+    const erg = document.getElementById('o-ergebnis');
+    erg.dataset.art = 'schliessen';
+    try {
+      const d = await api('/api/order/schliessen', { post: true, daten: { symbol } });
+      leeren(erg, d.ausgefuehrt ? meldung('gut', 'Geschlossen (Papier): ' + d.symbol + ' ' + kurzzahl(d.menge) + ' @ ' + preisText(d.ausgefuehrter_preis) +
+          (d.ergebnis != null ? ', Ergebnis ' + zahl(d.ergebnis) + ' ' + (INFO ? INFO.waehrung : '') + ' netto' : '') + '.')
+        : [meldung('fehler', 'Nicht geschlossen:'), h('ul', { class: 'schritte' }, d.gruende.map(g => h('li', { class: 'fehler' }, g)))]);
+    } catch (e) { leeren(erg, meldung('fehler', e.message)); }
+    await orderPositionen();
+    ladeUebersicht(true).catch(() => {});
+    live.info && Promise.all(live.info.symbole.map((s, i) => liveSymbol(s, i))).catch(() => {});
+  });
+  return k;
+}
+
+async function liveSymbol(symbol, i) {
+  const karte = document.getElementById(liveId(i));
+  if (!karte) return;
+  let d;
+  try { d = await api('/api/live/chart?symbol=' + encodeURIComponent(symbol) + '&takt=' + encodeURIComponent(live.takt)); }
+  catch (e) { leeren(karte, h('h2', null, symbol), meldung('fehler', e.message)); return; }
+  if (document.getElementById(liveId(i)) !== karte) return;
+  leeren(karte, ...liveKarte(d));
+}
+function liveKarte(d) {
+  const K = d.kerzen, n = K.length, W = INFO ? INFO.waehrung : '';
+  const letzter = d.kurs ? (d.kurs.mitte ?? d.kurs.letzter) : (n ? K[n - 1][4] : null);
+  const aenderung = n && letzter != null ? letzter / K[0][1] - 1 : null;
+  const offene = d.trades.filter(t => t.status === 'offen');
+  const teile = [h('div', { class: 'live-kopf' }, h('h2', null, d.symbol), h('span', { class: 'live-preis' }, preisText(letzter)),
+    aenderung != null ? h('span', { class: vorzeichen(aenderung) }, prozent(aenderung, 2) + ' im Ausschnitt') : null,
+    d.kurs && d.kurs.bid != null && d.kurs.ask != null ? h('span', { class: 'leise klein' }, 'Kauf ' + preisText(d.kurs.ask) + ' · Verkauf ' + preisText(d.kurs.bid)) : null)];
+  if (d.kurs_fehler) teile.push(meldung('warn', d.kurs_fehler));
+  for (const f of d.fehler) teile.push(meldung('warn', f));
+  // Position
+  teile.push(h('div', { class: 'live-zeile' }, h('strong', null, 'Position:'),
+    offene.length ? offene.map(t => {
+      const erg = letzter == null ? null : (letzter - t.einstieg.preis) * t.menge * (t.richtung === 'long' ? 1 : -1);
+      return h('span', { class: 'chip ' + t.richtung, title: 'Einstieg ' + ortszeit(t.einstieg.zeit, true) },
+        t.richtung.toUpperCase() + ' ' + kurzzahl(t.menge) + ' @ ' + preisText(t.einstieg.preis) + (erg == null ? '' : ' · offen ' + (erg >= 0 ? '+' : '') + zahl(erg) + ' ' + W));
+    }) : h('span', { class: 'leise' }, 'keine offen')));
+  // KI
+  const ki = d.einschaetzung;
+  teile.push(h('div', { class: 'live-zeile' }, h('strong', null, 'KI-Einschätzung:'),
+    ki ? [...ki.prognosen.map(p => h('span', { class: 'chip ki', title: p.status === 'ausgewertet' ? (p.treffer ? 'ausgewertet: Treffer' : 'ausgewertet: kein Treffer') : 'noch offen' },
+      (HORIZONT_TEXT[p.horizont] || p.horizont) + ': ' + (RICHTUNG_TEXT[p.richtung] || p.richtung) + (p.wahrscheinlichkeit != null ? ' ' + Math.round(p.wahrscheinlichkeit * 100) + ' %' : ''))),
+      h('span', { class: 'leise klein' }, 'vor ' + (ki.alter_min < 90 ? ki.alter_min + ' Min.' : Math.round(ki.alter_min / 60) + ' Std.') + (ki.preis != null ? ', Kurs damals ' + preisText(ki.preis) : '') + ' · Denkanstoß, keine Prognose')]
+      : h('span', { class: 'leise' }, 'noch keine für dieses Symbol (Reiter KI: „Einschätzung anstoßen“)')));
+  teile.push(liveChart(d));
+  const legende = h('div', { class: 'legende' }, h('span', { class: 'l-long' }, 'Long (▲ Einstieg)'), h('span', { class: 'l-short' }, 'Short (▼ Einstieg)'),
+    h('span', { class: 'l-stop' }, 'Stop'), h('span', { class: 'l-ziel' }, 'Ziel'), h('span', null, 'Kreis = Ausstieg'));
+  teile.push(legende);
+  // Trades als Tabelle (jüngste zuerst)
+  const liste = d.trades.slice(-6).reverse();
+  teile.push(liste.length ? h('table', null, h('thead', null, h('tr', null, ['Richtung', 'Einstieg', 'Ausstieg'].map(t => h('th', null, t)), ['Menge', 'Stop', 'Ziel', 'Ergebnis'].map(t => h('th', { class: 'z' }, t)))),
+    h('tbody', null, liste.map(t => {
+      const erg = t.netto != null ? t.netto : t.brutto;
+      return h('tr', null, h('td', null, h('span', { class: 'chip ' + t.richtung }, t.richtung)),
+        h('td', { class: 'nowrap' }, ortszeit(t.einstieg.zeit, true) + ' @ ' + preisText(t.einstieg.preis)),
+        h('td', { class: 'nowrap' }, t.ausstieg ? ortszeit(t.ausstieg.zeit, true) + ' @ ' + preisText(t.ausstieg.preis) : 'offen'),
+        h('td', { class: 'z' }, kurzzahl(t.menge)), h('td', { class: 'z' }, t.stop != null ? preisText(t.stop) : '–'), h('td', { class: 'z' }, t.ziel != null ? preisText(t.ziel) : '–'),
+        h('td', { class: 'z ' + vorzeichen(erg) }, erg == null ? '–' : zahl(erg) + (t.netto == null ? ' (brutto)' : '')));
+    }))) : h('p', { class: 'leise klein' }, 'Noch keine eigenen Trades zu diesem Symbol. Der Autopilot handelt nur, wenn die Strategie ein Signal gibt und die Risikoprüfung zustimmt.'));
+  return teile;
+}
+function liveChart(d) {
+  const K = d.kerzen, n = K.length;
+  if (!n) return meldung('warn', 'Keine Kerzen erhalten.');
+  const schmal = window.innerWidth < 640;                                     // Handy: kleinere Zeichenfläche, damit die Schrift lesbar bleibt
+  const B_ = schmal ? 600 : 1000, H_ = schmal ? 420 : 380, L = 8, R = schmal ? 126 : 100, T = 14, B = 26;
+  const slot = (B_ - L - R) / n, breite = Math.max(1.5, slot * 0.64), t0 = K[0][0], dt = d.takt_s;
+  const xt = t => Math.min(B_ - R, Math.max(L, L + slot * (t - t0) / dt));
+  let lo = Math.min(...K.map(k => k[3])), hi = Math.max(...K.map(k => k[2]));
+  const spanne = (hi - lo) || hi * 0.002, ausserhalb = [];
+  // Stop und Ziel nur dann in den Bildausschnitt aufnehmen, wenn sie nicht weit weg liegen
+  const sichtbar = d.trades.filter(t => !t.ausstieg || t.ausstieg.zeit >= t0);
+  for (const t of sichtbar) for (const [name, v] of [['Stop', t.stop], ['Ziel', t.ziel]]) {
+    if (v == null) continue;
+    if (v > lo - spanne && v < hi + spanne) { lo = Math.min(lo, v); hi = Math.max(hi, v); } else ausserhalb.push(name + ' ' + preisText(v));
+  }
+  const pad = (hi - lo) * 0.05 || 1;
+  const ylo = lo - pad, yhi = hi + pad;
+  const Y = v => T + (1 - (v - ylo) / (yhi - ylo)) * (H_ - T - B);
+  const s = svg('svg', { class: 'chart live' + (schmal ? ' schmal' : ''), viewBox: `0 0 ${B_} ${H_}`, role: 'img', 'aria-label': 'Kerzenchart ' + d.symbol + ', Kerzenlänge ' + d.takt });
+  for (const v of schoeneSchritte(ylo, yhi, 5)) s.append(svg('line', { class: 'gitter', x1: L, x2: B_ - R, y1: Y(v), y2: Y(v) }), svg('text', { x: B_ - R + 6, y: Y(v) + 4 }, preisText(v)));
+  const schritt = Math.max(1, Math.ceil(n / 7)); let vorTag = '';
+  for (let i = Math.floor(schritt / 2); i < n; i += schritt) {
+    const tag = new Date(K[i][0] * 1000).toDateString(), x = L + slot * (i + 0.5);
+    s.append(svg('line', { class: 'gitter', x1: x, x2: x, y1: H_ - B, y2: H_ - B + 4 }), svg('text', { x, y: H_ - B + 17, 'text-anchor': 'middle' }, ortszeit(K[i][0], tag !== vorTag && vorTag !== '')));
+    vorTag = tag;
+  }
+  const laufend = K[n - 1][0] + dt > Date.now() / 1000;
+  K.forEach((k, i) => {
+    const x = L + slot * (i + 0.5), auf = k[4] >= k[1], klasse = auf ? 'kerze-auf' : 'kerze-ab';
+    const yo = Y(k[1]), yc = Y(k[4]), kopf = Math.min(yo, yc), hoehe = Math.max(1.2, Math.abs(yo - yc));
+    const g = svg('g', { class: (laufend && i === n - 1) ? 'kerze-laufend' : null },
+      svg('title', null, ortszeit(k[0], true) + '  O ' + preisText(k[1]) + '  H ' + preisText(k[2]) + '  T ' + preisText(k[3]) + '  S ' + preisText(k[4]) + ((laufend && i === n - 1) ? '  (läuft noch)' : '')),
+      svg('line', { class: 'docht ' + klasse, x1: x, x2: x, y1: Y(k[2]), y2: Y(k[3]) }),
+      svg('rect', { class: klasse + ((laufend && i === n - 1) ? ' kerze-laufend' : ''), x: x - breite / 2, y: kopf, width: breite, height: hoehe }));
+    s.append(g);
+  });
+  // eigene Trades: Stop und Ziel als Linien, Einstieg und Ausstieg als Marken
+  const beschriftung = [];
+  for (const t of sichtbar) {
+    const xe = xt(t.einstieg.zeit), xa = t.ausstieg ? xt(t.ausstieg.zeit) : B_ - R;
+    const klemme = v => Math.min(H_ - B, Math.max(T, Y(v)));
+    for (const [art, v, name] of [['stop', t.stop, 'Stop'], ['ziel', t.ziel, 'Ziel']]) {
+      if (v == null || v < ylo || v > yhi) continue;
+      const bis = Math.max(xa, xe + 6);
+      s.append(svg('line', { class: art, x1: xe, x2: bis, y1: Y(v), y2: Y(v) }, svg('title', null, name + ' ' + preisText(v))));
+      if (!t.ausstieg) beschriftung.push({ art, y: Y(v), text: name + ' ' + preisText(v) });       // offene Position: Beschriftung am rechten Rand
+    }
+    const ye = klemme(t.einstieg.preis);
+    const beschr = (t.richtung === 'long' ? 'Long ' : 'Short ') + kurzzahl(t.menge) + ' · Einstieg ' + preisText(t.einstieg.preis) + ' (' + ortszeit(t.einstieg.zeit, true) + ')' +
+      (t.ausstieg ? ' · Ausstieg ' + preisText(t.ausstieg.preis) + ' (' + ortszeit(t.ausstieg.zeit, true) + ')' : ' · offen');
+    if (t.ausstieg) {
+      const ya = klemme(t.ausstieg.preis), erg = t.netto != null ? t.netto : t.brutto;
+      s.append(svg('line', { class: 'verbinder ' + t.richtung, x1: xe, y1: ye, x2: xa, y2: ya }),
+        svg('circle', { class: 'ausstieg ' + t.richtung, cx: xa, cy: ya, r: 4.5 }, svg('title', null, beschr)));
+      if (erg != null) { const links = xa > B_ - R - 60; s.append(svg('text', { class: erg >= 0 ? 'ergebnis-plus' : 'ergebnis-minus', x: links ? xa - 8 : xa + 8, y: ya + (t.richtung === 'long' ? -8 : 15), 'text-anchor': links ? 'end' : 'start' }, (erg >= 0 ? '+' : '') + zahl(erg))); }
+    }
+    const zeig = t.richtung === 'long' ? `${xe - 7},${ye + 11} ${xe + 7},${ye + 11} ${xe},${ye - 1}` : `${xe - 7},${ye - 11} ${xe + 7},${ye - 11} ${xe},${ye + 1}`;
+    s.append(svg('polygon', { class: 'marke ' + t.richtung, points: zeig }, svg('title', null, beschr)));
+  }
+  for (const b of beschriftung) s.append(svg('rect', { class: b.art + '-feld', x: B_ - R + 1, y: b.y - 9, width: R - 3, height: 18, rx: 3 }),
+    svg('text', { class: 'feld-text', x: B_ - R + 6, y: b.y + 4 }, b.text));
+  // aktueller Kurs
+  const jetzt = d.kurs ? (d.kurs.mitte ?? d.kurs.letzter) : K[n - 1][4];
+  if (jetzt != null && jetzt >= ylo && jetzt <= yhi) {
+    s.append(svg('line', { class: 'preislinie', x1: L, x2: B_ - R, y1: Y(jetzt), y2: Y(jetzt) }),
+      svg('rect', { class: 'preisfeld', x: B_ - R + 1, y: Y(jetzt) - 9, width: R - 3, height: 18, rx: 3 }),
+      svg('text', { class: 'preisfeld-text', x: B_ - R + 6, y: Y(jetzt) + 4 }, preisText(jetzt)));
+  }
+  return h('div', null, s, ausserhalb.length ? h('p', { class: 'leise klein' }, 'Außerhalb des Bildausschnitts: ' + ausserhalb.join(', ')) : null);
+}
+
+// ---------- Journal
+async function ladeJournal() {
+  const wurzel = $('#tab-journal');
+  let d;
+  try { d = await api('/api/journal?anzahl=60'); }
+  catch (e) { leeren(wurzel, meldung('fehler', 'Journal nicht ladbar: ' + e.message)); return; }
+  const wenige = d.trefferquote.some(q => q.n > 0 && q.n < 30);
+  const quote = h('div', { class: 'karte' }, h('h2', null, 'Trefferquote der Einschätzungen'),
+    h('table', null, h('thead', null, h('tr', null, h('th', null, 'Horizont'), ['n (ausgewertet)', 'Treffer', 'Trefferquote', 'noch offen', 'Schwelle'].map(t => h('th', { class: 'z' }, t)))),
+      h('tbody', null, d.trefferquote.map(q => h('tr', null, h('td', null, q.horizont), h('td', { class: 'z' }, q.n), h('td', { class: 'z' }, q.treffer),
+        h('td', { class: 'z' }, q.quote == null ? '–' : zahl(q.quote, 1) + ' %'), h('td', { class: 'z' }, q.offen), h('td', { class: 'z' }, zahl(q.schwelle, 1) + ' %'))))),
+    h('p', { class: 'leise klein' }, 'n steht immer dabei. ' + (wenige ? 'Mit weniger als 30 Fällen je Horizont ist die Quote kaum aussagekräftig (Zufall). ' : '') +
+      'Treffer: „steigt“ = Plus von mindestens der Schwelle, „fällt“ = Minus von mindestens der Schwelle, „seitwärts“ = Bewegung bleibt darunter.'));
+
+  const beschreibung = e => {
+    const o = e.order, s = e.signal;
+    if (o) return [o.seite, kurzzahl(o.menge), o.art, o.stop_loss != null ? 'Stop ' + kurzzahl(o.stop_loss) : null, o.take_profit != null ? 'Ziel ' + kurzzahl(o.take_profit) : null].filter(Boolean).join(' ');
+    if (s) return 'Signal ' + s.richtung;
+    return '';
+  };
+  const entscheidungen = h('div', { class: 'karte' }, h('h2', null, 'Letzte Entscheidungen'),
+    d.entscheidungen.length ? h('table', null, h('thead', null, h('tr', null, ['Nr', 'Zeit (UTC)', 'Modus', 'Symbol', 'Strategie', 'Order'].map(t => h('th', null, t)),
+      h('th', null, 'Risikoprüfung'), h('th', null, 'Ausführung'), h('th', { class: 'z' }, 'Ergebnis'), h('th', null, 'Notiz'))),
+      h('tbody', null, d.entscheidungen.map(e => h('tr', null, h('td', null, e.id), h('td', { class: 'leise nowrap' }, zeit(e.zeit)), h('td', null, e.modus), h('td', null, e.symbol), h('td', null, e.strategie),
+        h('td', { class: 'text' }, beschreibung(e)),
+        h('td', { class: 'text' }, e.pruefung == null ? h('span', { class: 'chip info' }, 'nicht geprüft') :
+          e.pruefung ? h('span', { class: 'chip ok' }, 'ok') : [h('span', { class: 'chip abgelehnt' }, 'abgelehnt'), h('ul', { class: 'schritte' }, e.gruende.map(g => h('li', null, g)))]),
+        h('td', null, e.ausfuehrung ? e.ausfuehrung.status + (e.ausfuehrung.preis != null ? ' @ ' + zahl(e.ausfuehrung.preis, 4) : '') : '–'),
+        h('td', { class: 'z ' + vorzeichen(e.ergebnis) }, e.ergebnis == null ? '–' : zahl(e.ergebnis)),
+        h('td', { class: 'leise text' }, e.notiz))))) : h('p', { class: 'leise' }, 'Das Journal ist noch leer.'));
+
+  const ein = h('div', { class: 'karte' }, h('h2', null, 'Einschätzungen (neueste zuerst)'),
+    d.einschaetzungen.length ? h('table', null, h('thead', null, h('tr', null, ['Nr', 'Zeit (UTC)', 'Wert', 'Richtung', 'Horizont', 'Stand'].map(t => h('th', null, t)), h('th', { class: 'z' }, 'Änderung'), h('th', null, 'Begründung'))),
+      h('tbody', null, d.einschaetzungen.map(e => h('tr', null, h('td', null, e.id), h('td', { class: 'leise nowrap' }, zeit(e.zeit)), h('td', null, e.wert), h('td', null, e.richtung), h('td', null, e.horizont),
+        h('td', { class: 'nowrap' }, e.status === 'ausgewertet' ? h('span', { class: 'chip ' + (e.treffer ? 'ok' : 'abgelehnt') }, e.treffer ? 'Treffer' : 'kein Treffer') : e.status + ' (fällig ' + zeit(e.faellig).slice(0, 10) + ')'),
+        h('td', { class: 'z' }, e.aenderung_prozent == null ? '–' : zahl(e.aenderung_prozent) + ' %'), h('td', { class: 'leise text' }, h('div', { class: 'klammer', title: e.begruendung }, e.begruendung)))))) : h('p', { class: 'leise' }, 'Noch keine Einschätzungen.'));
+  leeren(wurzel, quote, entscheidungen, ein);
+}
+
+// ---------- Weltlage
+async function ladeWeltlage() {
+  try {
+    const d = await api('/api/weltlage');
+    $('#welt-text').textContent = d.text;
+    $('#welt-stand').textContent = d.stand ? 'Stand ' + zeit(d.stand) + ' UTC' + (d.alter_min != null ? ' (vor ' + d.alter_min + ' Min.)' : '') : 'Noch kein Schnappschuss.';
+  } catch (e) { $('#welt-text').textContent = 'Nicht ladbar: ' + e.message; }
+}
+$('#welt-knopf').addEventListener('click', async () => {
+  const knopf = $('#welt-knopf'), ziel = $('#welt-meldung');
+  knopf.disabled = true; leeren(ziel, h('p', { class: 'leise' }, 'Rufe die Feeds ab, das dauert etwa eine halbe Minute ...'));
+  try {
+    const d = await api('/api/weltlage/abrufen', { post: true });
+    leeren(ziel, d.hinweis ? meldung('warn', d.hinweis) : null,
+      h('table', null, h('thead', null, h('tr', null, h('th', null, 'Feed'), h('th', null, 'Status'), h('th', null, 'Ergebnis'))),
+        h('tbody', null, d.feeds.map(f => h('tr', null, h('td', null, f.name), h('td', null, f.status || '–'), h('td', { class: f.fehler ? 'minus' : '' }, f.fehler || 'ok'))))));
+    await ladeWeltlage();
+  } catch (e) { leeren(ziel, meldung('fehler', 'Abruf fehlgeschlagen: ' + e.message)); }
+  knopf.disabled = false;
+});
+
+// ---------- Historie
+const hs = { reihen: null, ereignisse: null, daten: null, gewaehlt: null, start: false };
+async function initHistorie() {
+  if (hs.start) return;
+  hs.start = true;
+  try {
+    const [r, e] = await Promise.all([api('/api/historie/reihen'), api('/api/historie/ereignisse')]);
+    hs.reihen = r.reihen; hs.ereignisse = e.ereignisse;
+    const auswahl = $('#h-reihe');
+    for (const x of r.reihen) auswahl.append(h('option', { value: x.id }, x.titel + (x.geladen ? '' : '  (nicht geladen)')));
+    const vorbild = r.reihen.find(x => x.id === 'dow' && x.geladen) || r.reihen.find(x => x.geladen);
+    if (vorbild) auswahl.value = vorbild.id;
+    for (const art of e.arten) $('#h-art').append(h('option', { value: art }, art));
+  } catch (err) { leeren($('#h-meldung'), meldung('fehler', 'Historie nicht ladbar: ' + err.message)); hs.start = false; return; }
+  hLaden();
+}
+async function hLaden() {
+  const id = $('#h-reihe').value, von = $('#h-von').value.trim(), bis = $('#h-bis').value.trim();
+  const ziel = $('#h-meldung');
+  leeren(ziel);
+  const meta = hs.reihen.find(x => x.id === id);
+  if (meta && !meta.geladen) {
+    leeren(ziel, meldung('warn', 'Diese Reihe ist noch nicht geladen. Auf dem Rechner: python3 -m kitrader.historie laden ' + id));
+    leeren($('#chart')); $('#chart-info').textContent = ''; hs.daten = null; hListe(); return;
+  }
+  try {
+    hs.daten = await api('/api/historie/reihe?id=' + encodeURIComponent(id) + '&von=' + encodeURIComponent(von) + '&bis=' + encodeURIComponent(bis));
+  } catch (err) { leeren(ziel, meldung('fehler', err.message)); return; }
+  if (!hs.daten.punkte.length) leeren(ziel, meldung('warn', 'Keine Werte im gewählten Zeitraum.'));
+  hZeichnen(); hListe();
+  if (hs.gewaehlt) hStudie(hs.gewaehlt);          // die Studie gehört zur gewählten Reihe: bei Wechsel neu rechnen
+}
+const tage = n => n + (n === 1 ? ' Tag' : ' Tage');
+const ZEIT = d => Date.parse(String(d).slice(0, 10) + 'T00:00:00Z');
+function schoeneSchritte(lo, hi, anzahl) {
+  const roh = (hi - lo) / Math.max(1, anzahl), pot = Math.pow(10, Math.floor(Math.log10(roh || 1)));
+  const f = roh / pot, schritt = (f >= 5 ? 10 : f >= 2 ? 5 : f >= 1 ? 2 : 1) * pot;
+  const aus = []; for (let v = Math.ceil(lo / schritt) * schritt; v <= hi + 1e-9; v += schritt) aus.push(v);
+  return aus;
+}
+function logSchritte(lo, hi) {
+  const aus = [], dekaden = Math.log10(hi / lo);
+  const faktoren = dekaden <= 5 ? [1, 2, 5] : dekaden <= 8 ? [1, 3] : [1];      // sonst überlappen sich die Beschriftungen
+  for (let p = Math.floor(Math.log10(lo)); p <= Math.ceil(Math.log10(hi)); p++) for (const m of faktoren) { const v = m * Math.pow(10, p); if (v >= lo && v <= hi) aus.push(v); }
+  return aus.length >= 3 ? aus : [lo, hi];
+}
+function hZeichnen() {
+  const wurzel = $('#chart');
+  const d = hs.daten;
+  if (!d || !d.punkte.length) { leeren(wurzel); return; }
+  const log = $('#h-log').checked && d.punkte.every(p => p[1] > 0);
+  const pts = d.punkte.map(p => [ZEIT(p[0]), p[1]]).filter(p => isFinite(p[0]) && isFinite(p[1]));
+  const W = 1000, H = 400, L = 64, R = 14, T = 16, B = 70;
+  const t0 = pts[0][0], t1 = pts[pts.length - 1][0] || t0 + 1;
+  let lo = Math.min(...pts.map(p => p[1])), hi = Math.max(...pts.map(p => p[1]));
+  if (lo === hi) { lo -= 1; hi += 1; }
+  const fy = v => log ? Math.log(v) : v;
+  const ylo = fy(lo), yhi = fy(hi), pad = (yhi - ylo) * 0.04;
+  const X = t => L + (t - t0) / ((t1 - t0) || 1) * (W - L - R);
+  const Y = v => T + (1 - (fy(v) - (ylo - pad)) / ((yhi - ylo + 2 * pad) || 1)) * (H - T - B);
+  const s = svg('svg', { class: 'chart', viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': 'Linienchart ' + d.titel });
+  // y-Achse
+  for (const v of (log ? logSchritte(lo, hi) : schoeneSchritte(lo, hi, 6))) {
+    s.append(svg('line', { class: 'gitter', x1: L, x2: W - R, y1: Y(v), y2: Y(v) }), svg('text', { x: L - 6, y: Y(v) + 4, 'text-anchor': 'end' }, zahl(v, v < 10 ? 2 : 0)));
+  }
+  // x-Achse (Jahre)
+  const j0 = new Date(t0).getUTCFullYear(), j1 = new Date(t1).getUTCFullYear(), spanne = Math.max(1, j1 - j0);
+  const schritt = [1, 2, 5, 10, 20, 25, 50, 100].find(x => spanne / x <= 9) || 100;
+  for (let j = Math.ceil(j0 / schritt) * schritt; j <= j1; j += schritt) {
+    const x = X(Date.UTC(j, 0, 1)); if (x < L || x > W - R) continue;
+    s.append(svg('line', { class: 'gitter', x1: x, x2: x, y1: T, y2: H - B }), svg('text', { x, y: H - B + 16, 'text-anchor': 'middle' }, String(j)));
+  }
+  s.append(svg('path', { class: 'linie', d: pts.map((p, i) => (i ? 'L' : 'M') + X(p[0]).toFixed(1) + ' ' + Y(p[1]).toFixed(1)).join(' ') }));
+  // Ereignisse als Striche in einer eigenen Zeile unter der Achse
+  const art = $('#h-art').value;
+  const sichtbar = hEreignisseImBild();
+  const lane = H - B + 30;
+  s.append(svg('text', { x: L - 6, y: lane + 10, 'text-anchor': 'end' }, 'Ereignisse'));
+  for (const e of sichtbar) {
+    const x = X(ZEIT(e.beginn));
+    const g = svg('g', { class: 'ereignis' + (hs.gewaehlt === e.id ? ' gewaehlt' : ''), 'data-id': e.id, tabindex: '0', role: 'button', 'aria-label': e.beginn + ' ' + e.titel },
+      svg('title', null, e.beginn + ' · ' + e.art + ' · ' + e.titel),
+      svg('rect', { class: 'treffer', x: x - 4, y: lane - 4, width: 8, height: 26 }),
+      svg('rect', { class: 'sicht', x: x - 0.8, y: lane, width: 1.6, height: 18 }));
+    g.addEventListener('click', () => hWaehle(e.id));
+    g.addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); hWaehle(e.id); } });
+    s.append(g);
+  }
+  const gewaehlt = hs.ereignisse && hs.ereignisse.find(e => e.id === hs.gewaehlt);
+  if (gewaehlt) { const x = X(ZEIT(gewaehlt.beginn)); if (x >= L && x <= W - R) s.append(svg('line', { class: 'wahl', x1: x, x2: x, y1: T, y2: H - B })); }
+  // Fadenkreuz mit Wert
+  const kreuz = svg('line', { class: 'fadenkreuz', y1: T, y2: H - B, visibility: 'hidden' }), punkt = svg('circle', { class: 'punkt', r: 4, visibility: 'hidden' });
+  s.append(kreuz, punkt);
+  s.addEventListener('pointermove', ev => {
+    const r = s.getBoundingClientRect(), x = (ev.clientX - r.left) / r.width * W;
+    if (x < L || x > W - R) { kreuz.setAttribute('visibility', 'hidden'); punkt.setAttribute('visibility', 'hidden'); return; }
+    const t = t0 + (x - L) / (W - L - R) * (t1 - t0);
+    let a = 0, b = pts.length - 1;
+    while (b - a > 1) { const m = (a + b) >> 1; if (pts[m][0] <= t) a = m; else b = m; }
+    const p = Math.abs(pts[a][0] - t) <= Math.abs(pts[b][0] - t) ? pts[a] : pts[b];
+    kreuz.setAttribute('x1', X(p[0])); kreuz.setAttribute('x2', X(p[0])); kreuz.setAttribute('visibility', 'visible');
+    punkt.setAttribute('cx', X(p[0])); punkt.setAttribute('cy', Y(p[1])); punkt.setAttribute('visibility', 'visible');
+    $('#chart-info').textContent = new Date(p[0]).toISOString().slice(0, 10) + ': ' + zahl(p[1], p[1] < 10 ? 3 : 2) + ' ' + d.einheit;
+  });
+  leeren(wurzel, s);
+  $('#chart-info').textContent = d.titel + ' · ' + d.anzahl_gesamt + ' Werte' + (d.ausgeduennt ? ' (für das Bild ausgedünnt, Tiefs und Hochs bleiben erhalten)' : '') + (log ? ' · logarithmische Achse' : '');
+}
+function hEreignisseImBild() {
+  if (!hs.daten || !hs.daten.punkte.length || !hs.ereignisse) return [];
+  const von = hs.daten.punkte[0][0], bis = hs.daten.punkte[hs.daten.punkte.length - 1][0], art = $('#h-art').value;
+  return hs.ereignisse.filter(e => e.beginn >= von && e.beginn <= bis && (!art || e.art === art));
+}
+function hListe() {
+  const liste = hEreignisseImBild();
+  const ziel = $('#h-liste');
+  leeren(ziel, liste.length ? liste.slice(0, 400).map(e => h('button', { type: 'button', class: hs.gewaehlt === e.id ? 'gewaehlt' : null, 'data-id': e.id, onclick: () => hWaehle(e.id) },
+    e.beginn + ' · ' + e.art + ' · ' + e.titel)) : h('p', { class: 'leise' }, 'Keine Ereignisse im Zeitraum.'));
+  if (liste.length > 400) ziel.append(h('p', { class: 'leise klein' }, 'Nur die ersten 400 von ' + liste.length + ' gezeigt: Zeitraum oder Art einschränken.'));
+}
+async function hWaehle(id) {
+  hs.gewaehlt = id; hZeichnen(); hListe();
+  await hStudie(id);
+}
+async function hStudie(id) {
+  const ziel = $('#h-studie');
+  leeren(ziel, h('h2', null, 'Ereignisstudie'), h('p', { class: 'leise' }, 'Rechne ...'));
+  const reihe = $('#h-reihe').value, nr = hs.studieNr = (hs.studieNr || 0) + 1;
+  let s;
+  try { s = await api('/api/historie/studie?id=' + encodeURIComponent(id) + '&reihe=' + encodeURIComponent(reihe)); }
+  catch (e) { if (nr === hs.studieNr) leeren(ziel, h('h2', null, 'Ereignisstudie'), meldung('warn', e.message)); return; }
+  if (nr !== hs.studieNr) return;                 // inzwischen wurde etwas anderes gewählt
+  const e = s.ereignis, q = e.quelle;
+  const zeile = (name, f) => h('tr', null, h('td', null, name), ...f);
+  const zellen = (datum, wert, rendite) => [h('td', { class: 'nowrap' }, datum || '–'), h('td', { class: 'z' }, wert == null ? '–' : zahl(wert, wert < 10 ? 3 : 2)), h('td', { class: 'z ' + vorzeichen(rendite) }, rendite == null ? 'noch nicht abgedeckt' : prozent(rendite))];
+  const zeilen = [];
+  if (s.start) {
+    zeilen.push(zeile('Start', zellen(s.start.datum, s.start.wert, null).slice(0, 2).concat([h('td')])));
+    for (const m of [1, 3, 6, 12]) { const x = s.horizonte[String(m)]; if (x) zeilen.push(zeile('nach ' + m + ' Monat' + (m > 1 ? 'en' : ''), zellen(x.datum, x.wert, x.rendite))); }
+    if (s.tief) zeilen.push(zeile('Tief in 12 Monaten', zellen(s.tief.datum, s.tief.wert, s.tief.rendite)));
+    if (s.ende) zeilen.push(zeile('Ende des Ereignisses', zellen(s.ende.datum, s.ende.wert, s.ende.rendite)));
+  }
+  let erholung = '';
+  if (s.erholung) erholung = s.erholung.erholt ? (s.erholung.tage === 0 ? 'Kein Rückgang unter den Startwert.' : 'Wieder auf Startniveau am ' + s.erholung.datum + ' (' + tage(s.erholung.tage) + ' nach Beginn, ' + tage(s.erholung.tage_seit_tief) + ' nach dem Tief).') : 'Bis ' + s.erholung.bis + ' nicht wieder auf Startniveau.';
+  leeren(ziel, h('h2', null, e.titel),
+    h('p', { class: 'leise klein' }, e.beginn + (e.ende ? ' bis ' + e.ende : '') + ' · ' + e.art + ' · ' + e.region + ' · Beginn auf ' + e.genauigkeit + ' genau'),
+    h('p', null, e.beschreibung),
+    q ? h('p', { class: 'leise klein' }, 'Quelle: ', /^https?:\/\//.test(q.url || '') ? h('a', { href: q.url, target: '_blank', rel: 'noopener noreferrer' }, q.name) : q.name, ' (abgerufen ' + q.abgerufen + ')') : null,
+    h('h3', null, 'Entwicklung: ' + s.titel_reihe),
+    zeilen.length ? h('table', null, h('thead', null, h('tr', null, h('th', null, ''), h('th', null, 'Datum'), h('th', { class: 'z' }, 'Wert'), h('th', { class: 'z' }, 'seit Start'))), h('tbody', null, zeilen)) : null,
+    erholung ? h('p', null, 'Erholung: ' + erholung) : null,
+    s.hinweise.length ? h('ul', { class: 'leise klein' }, s.hinweise.map(t => h('li', null, t))) : null,
+    h('p', { class: 'leise klein' }, 'Rückblick auf genau dieses eine Ereignis (n = 1), keine Prognose. Ereignisse überschneiden sich; Vergleiche mehrerer Ereignisse einer Art mit n gibt es auf der Kommandozeile: python3 -m kitrader.historie studie --art ' + e.art));
+}
+$('#h-los').addEventListener('click', hLaden);
+$('#h-reihe').addEventListener('change', hLaden);
+$('#h-log').addEventListener('change', hZeichnen);
+$('#h-art').addEventListener('change', () => { hZeichnen(); hListe(); });
+
+// ---------- KI
+const PFEIL = { steigt: '↑', faellt: '↓', seitwaerts: '→' };
+const RICHTUNG_WORT = { steigt: 'steigt', faellt: 'fällt', seitwaerts: 'seitwärts' };
+const pfeil = r => h('span', { class: 'pfeil ' + r, 'aria-hidden': 'true' }, PFEIL[r] || '?');
+let kiStart = false, kiErkanntTimer = null;
+async function initKI() {
+  if (kiStart) return;
+  kiStart = true;
+  const auswahl = $('#ki-treiber');
+  leeren(auswahl, h('option', { value: 'einstellung' }, 'wie in den Einstellungen (' + (INFO ? INFO.ki_treiber : '?') + ')'), h('option', { value: 'aus' }, 'aus: nur den Kontext zeigen, nichts fragen'));
+  try {
+    const info = live.info || await api('/api/live/symbole');
+    const liste = info.symbole || [];
+    leeren($('#ki-auswahl'), liste.length ? liste.map(s => h('option', { value: s }, s)) : h('option', { value: '' }, '(Watchlist leer)'));
+  } catch (e) { leeren($('#ki-auswahl'), h('option', { value: '' }, '(Watchlist nicht ladbar)')); }
+}
+async function kiErkennen(wert) {
+  const ziel = $('#ki-erkannt');
+  if (!wert) { leeren(ziel); return null; }
+  try {
+    const d = await api('/api/symbol?q=' + encodeURIComponent(wert));
+    if (!d.erkannt) { leeren(ziel, h('span', { class: 'minus' }, '✗ ' + d.fehler)); return null; }
+    leeren(ziel, h('span', { class: 'plus' }, '✓ Erkannt: '), h('b', null, d.symbol), d.name && d.name !== d.symbol ? ' (' + d.name + ')' : '',
+      d.paar ? h('span', { class: 'leise' }, ' · Kraken-Paar ' + d.paar.wsname + ' (' + d.paar.altname + ')') : '', d.hinweis ? h('span', { class: 'leise' }, ' · ' + d.hinweis) : '');
+    return d;
+  } catch (e) { leeren(ziel, h('span', { class: 'minus' }, '✗ ' + e.message)); return null; }
+}
+$('#ki-wert').addEventListener('input', () => {
+  clearTimeout(kiErkanntTimer);
+  const w = $('#ki-wert').value.trim();
+  if (!w) { leeren($('#ki-erkannt')); return; }
+  kiErkanntTimer = setTimeout(() => kiErkennen(w), 500);
+});
+$('#ki-wert').addEventListener('keydown', e => { if (e.key === 'Enter') $('#ki-knopf').click(); });
+$('#ki-auswahl').addEventListener('change', () => { $('#ki-wert').value = ''; leeren($('#ki-erkannt')); });
+function kiAnzeige(d) {
+  const namen = { kurz: ['Kurz', '1 Tag'], mittel: ['Mittel', '3 Monate'], lang: ['Lang', '1 Jahr'] };
+  const karten = Object.keys(namen).filter(n => d.prognosen[n]).map(n => {
+    const p = d.prognosen[n], w = Math.round(p.wahrscheinlichkeit * 100);
+    const balken = h('div', { class: 'wahr ' + p.richtung }, h('span')); balken.firstChild.style.width = w + '%';
+    return h('div', { class: 'karte ki-karte' }, h('h3', null, namen[n][0] + ' · ' + namen[n][1]),
+      h('div', { class: 'gross' }, pfeil(p.richtung), RICHTUNG_WORT[p.richtung] || p.richtung, h('small', null, w + ' % Wahrscheinlichkeit')), balken,
+      h('p', null, h('b', null, 'Begründung'), p.begruendung), h('p', null, h('b', null, 'Gegenargumente'), p.gegenargumente),
+      h('p', null, h('b', null, 'Falsch, wenn'), p.was_widerlegt), h('p', { class: 'leise klein' }, 'Journal-Nr. ' + p.journal_id));
+  });
+  return [h('div', { class: 'ki-kopf' }, h('h2', null, d.wert), h('span', { class: 'leise' }, 'Kurs ' + preisText(d.preis) + ' · Stand ' + zeit(d.zeit) + ' UTC · Treiber ' + d.treiber)),
+    ...d.warnungen.map(w => meldung('warn', w)), h('div', { class: 'raster' }, karten),
+    h('p', { class: 'leise klein' }, 'Das ist eine Einschätzung der KI, keine Gewissheit und keine Anlageberatung. Sie wird nach Ablauf der Horizonte automatisch gegen den echten Kurs ausgewertet (Journal).')];
+}
+$('#ki-knopf').addEventListener('click', async () => {
+  const eigen = $('#ki-wert').value.trim(), wert = eigen || $('#ki-auswahl').value, knopf = $('#ki-knopf');
+  const meld = $('#ki-meldung'), ergebnis = $('#ki-ergebnis'), kontext = $('#ki-kontext');
+  leeren(meld); leeren(ergebnis); kontext.hidden = true; kontext.open = false;
+  if (!wert) { leeren(meld, meldung('warn', 'Bitte einen Wert wählen oder eingeben, z. B. BTC, Bitcoin oder ETH/EUR.')); return; }
+  knopf.disabled = true;
+  const t0 = Date.now(), uhr = setInterval(() => { $('#ki-status').textContent = 'läuft seit ' + Math.round((Date.now() - t0) / 1000) + ' s ...'; }, 1000);
+  $('#ki-status').textContent = 'läuft ...';
+  try {
+    if (eigen) { const erkannt = await kiErkennen(eigen); if (!erkannt) { throw new Error('Das Symbol wurde nicht erkannt (siehe oben).'); } }
+    const d = await api('/api/ki', { post: true, daten: { wert, treiber: $('#ki-treiber').value } });
+    const hat = d.prognosen && Object.keys(d.prognosen).length;
+    if (hat) leeren(ergebnis, ...kiAnzeige(d));
+    else leeren(ergebnis, h('div', { class: 'ki-kopf' }, h('h2', null, d.wert), h('span', { class: 'leise' }, 'Kurs ' + preisText(d.preis) + ' · Stand ' + zeit(d.zeit) + ' UTC · Treiber ' + d.treiber)),
+      ...d.warnungen.map(w => meldung('warn', w)), meldung('warn', 'Treiber „' + d.treiber + '“: Es wurde nichts gefragt und nichts gespeichert. Unten steht der Kontext, den die KI bekäme.'));
+    $('#ki-kontext-text').textContent = d.kontext; kontext.hidden = false; kontext.open = !hat;
+    $('#ki-kontext-titel').textContent = hat ? 'Kontext, den die KI bekommen hat' : 'Kontext (so sieht die KI die Lage)';
+  } catch (e) { leeren(meld, meldung('fehler', e.message)); }
+  clearInterval(uhr); $('#ki-status').textContent = ''; knopf.disabled = false;
+});
+
+// ---------- Trends: Welt-Rotation, Nachrichten-Radar, KI-Richtung, ähnliche Fälle (alles nur Lesen aus gespeicherten Daten)
+const trendsZustand = { laeuft: false };
+const SPANNE = { '1T': 1.0, '1W': 2.0, '1M': 4.0 };
+const HORIZ_WELT = ['1T', '1W', '1M'];
+const HORIZ_WELT_TEXT = { '1T': '1 Tag', '1W': '1 Woche', '1M': '1 Monat' };
+const pz = (v, n = 1) => v == null ? '–' : (v >= 0 ? '+' : '−') + zahl(Math.abs(v), n) + ' %';
+function weltZelle(v, h1) {
+  const klasse = v == null ? 'n' : Math.abs(v) >= SPANNE[h1] ? (v > 0 ? 'p2' : 'm2') : Math.abs(v) >= SPANNE[h1] / 4 ? (v > 0 ? 'p1' : 'm1') : 'n';
+  return h('td', { class: 'w ' + klasse, title: v == null ? 'keine Daten' : null }, pz(v));
+}
+function hinweisKarte(titel, text, fehler) {
+  return h('div', { class: 'karte' }, h('h2', null, titel), fehler ? meldung('warn', fehler) : null, h('p', { class: 'leise' }, text));
+}
+function weltKarte(w) {
+  if (!w.vorhanden) return hinweisKarte('Welt-Rotation', w.hinweis, w.fehler);
+  const kopf = () => [h('th', null, ''), ...HORIZ_WELT.map(x => h('th', { class: 'w' }, HORIZ_WELT_TEXT[x]))];      // je Tabelle neu: ein Element hat nur einen Elternknoten
+  const regionen = [...w.regionen].sort((a, b) => (b.aend['1W'] ?? -1e9) - (a.aend['1W'] ?? -1e9));
+  const klassen = [...w.klassen].sort((a, b) => (b.aend['1W'] ?? -1e9) - (a.aend['1W'] ?? -1e9));
+  const tab = (titel, zeilen) => h('div', null, h('h3', null, titel), h('table', null, h('thead', null, h('tr', null, ...kopf())), h('tbody', null, zeilen)));
+  const rang = h('div', { class: 'rang' }, HORIZ_WELT.map(x => h('div', null, h('h3', null, 'Stärkste und schwächste · ' + HORIZ_WELT_TEXT[x]),
+    h('ul', null, (w.rang[x].gewinner || []).map(([n, v]) => h('li', null, h('span', null, n), h('span', { class: 'plus' }, pz(v)))),
+      (w.rang[x].verlierer || []).map(([n, v]) => h('li', null, h('span', null, n), h('span', { class: 'minus' }, pz(v))))))));
+  return h('div', { class: 'karte' }, h('h2', null, 'Welt-Rotation: wer gewinnt, wer verliert'),
+    h('p', { class: 'leise klein' }, 'Stand ' + zeit(w.stand) + ' UTC (vor ' + zahl(w.alter_h, 1) + ' Std.) · Quellen: ' + w.quellen.join(', ') +
+      (w.weltschnitt && w.weltschnitt['1W'] != null ? ' · Schnitt der Leitindizes (1 Woche): ' + pz(w.weltschnitt['1W']) : '')),
+    h('div', { class: 'raster' },
+      tab('Nach Region (Leitindex)', regionen.map(r => h('tr', { title: r.index }, h('td', null, r.region), ...HORIZ_WELT.map(x => weltZelle(r.aend[x], x))))),
+      tab('Nach Anlageklasse', klassen.map(k => h('tr', { title: (k.mitglieder || []).join(', ') }, h('td', null, k.klasse), ...HORIZ_WELT.map(x => weltZelle(k.aend[x], x)))))),
+    rang,
+    w.umschichtung && w.umschichtung.length ? h('div', null, h('h3', null, 'Umschichtungen'), h('ul', null, w.umschichtung.map(u => h('li', null, u)))) : null,
+    w.fehlend && w.fehlend.length ? h('p', { class: 'leise klein' }, 'Fehlt: ' + w.fehlend.join('; ')) : null,
+    ...(w.hinweise || []).map(t => h('p', { class: 'leise klein' }, t)),
+    h('p', { class: 'leise klein' }, 'Starke Farbe = Bewegung ab ' + HORIZ_WELT.map(x => zahl(SPANNE[x], 0) + ' % (' + HORIZ_WELT_TEXT[x] + ')').join(', ') +
+      '. Die Rotation beschreibt Kursbewegungen, misst keine Geldflüsse und sagt nichts voraus.'));
+}
+function radarKarte(r) {
+  if (!r.vorhanden) return hinweisKarte('Nachrichten-Radar', r.hinweis, r.fehler);
+  const zaehl = (titel, liste) => liste.length ? h('div', null, h('h3', null, titel), h('table', null,
+    h('thead', null, h('tr', null, h('th', null, ''), h('th', { class: 'z' }, 'Quellen 6 Std.'), h('th', { class: 'z' }, '24 Std.'))),
+    h('tbody', null, liste.map(x => h('tr', null, h('td', null, x.name + (x.faktor && x.faktor >= 2 ? ' ⚡' : ''), x.laender && x.laender.length ? h('small', { class: 'leise' }, ' · ' + x.laender.join(', ')) : null),
+      h('td', { class: 'z' }, x.verlage_6h), h('td', { class: 'z' }, x.verlage_24h)))))) : null;
+  return h('div', { class: 'karte' }, h('h2', null, 'Nachrichten-Radar: Top-Themen der letzten 24 Stunden'),
+    h('p', { class: 'leise klein' }, r.meldungen_24h + ' Meldungen von ' + r.quellen_24h + ' Quellen · letzter Abruf ' + zeit(r.abgerufen) + ' UTC' + (r.alter_min != null ? ' (vor ' + r.alter_min + ' Min.)' : '') +
+      ' · Ein Thema zählt ab zwei unabhängigen Quellen (oder einer amtlichen).'),
+    r.themen.length ? h('ul', { class: 'themen' }, r.themen.map(t => h('li', null,
+      h('div', { class: 'titel' }, t.url ? h('a', { href: t.url, target: '_blank', rel: 'noopener noreferrer' }, t.titel) : t.titel),
+      h('div', { class: 'leise klein' }, t.verlage_6h + ' Quellen in 6 Std. · ' + t.verlage_24h + ' in 24 Std. · zuerst gemeldet von ' + t.quelle),
+      h('div', { class: 'chips' }, t.neu ? h('span', { class: 'chip ok' }, 'NEU') : null, t.amtlich ? h('span', { class: 'chip info' }, 'amtliche Quelle') : null,
+        ...t.arten.map(x => h('span', { class: 'chip info', title: 'Ereignisart' }, x))),
+      t.regionen.length ? h('div', { class: 'chips' }, h('span', { class: 'leise klein' }, 'Gemeldet in:'), ...t.regionen.map(x => h('span', { class: 'chip neutral', title: 'Region der meldenden Quellen' }, x))) : null,
+      t.laender.length ? h('div', { class: 'chips' }, h('span', { class: 'leise klein' }, 'Genannt:'), ...t.laender.map(x => h('span', { class: 'chip neutral', title: 'im Text genannte Länder' }, x))) : null,
+      [...t.klassen, ...t.branchen].length ? h('div', { class: 'chips' }, h('span', { class: 'leise klein' }, 'Betroffene Märkte:'), ...[...t.klassen, ...t.branchen].map(x => h('span', { class: 'chip markt', title: 'betroffene Anlageklasse oder Branche' }, x))) : null))) : h('p', { class: 'leise' }, 'Kein Thema mit mindestens zwei unabhängigen Quellen.'),
+    h('div', { class: 'raster' }, zaehl('Ereignisarten', r.arten), zaehl('Betroffene Märkte (Anlageklassen)', r.klassen), zaehl('Betroffene Branchen', r.branchen)));
+}
+function kiZelle(p) {
+  if (!p || !p.richtung) return h('td', { class: 'leise' }, '–');
+  return h('td', null, h('span', { class: 'chip ' + p.richtung }, pfeil(p.richtung), (RICHTUNG_WORT[p.richtung] || p.richtung) + (p.wahrscheinlichkeit != null ? ' ' + Math.round(p.wahrscheinlichkeit * 100) + ' %' : '')));
+}
+function kiRichtungKarte(k) {
+  const tabelle = h('table', null, h('thead', null, h('tr', null, ['Wert', 'Kurz (1 Tag)', 'Mittel (3 Monate)', 'Lang (1 Jahr)', 'Stand'].map(t => h('th', null, t)))),
+    h('tbody', null, k.werte.map(w => w.vorhanden
+      ? h('tr', null, h('td', null, w.wert), kiZelle(w.kurz), kiZelle(w.mittel), kiZelle(w.lang), h('td', { class: 'leise klein nowrap' }, w.quelle + ', vor ' + (w.alter_h < 1.5 ? Math.round(w.alter_h * 60) + ' Min.' : zahl(w.alter_h, 1) + ' Std.')))
+      : h('tr', null, h('td', null, w.wert), h('td', { class: 'leise', colspan: 4 }, 'noch keine Einschätzung')))));
+  return h('div', { class: 'karte' }, h('h2', null, 'KI-Richtung der Watchlist'), tabelle,
+    k.vorhanden ? null : h('p', { class: 'leise' }, k.hinweis),
+    h('p', { class: 'leise klein' }, 'Aus der letzten Morgenlage bzw. dem Journal (das Neuere zählt). ↑ steigt, ↓ fällt, → seitwärts, mit der Wahrscheinlichkeit der KI. Ein Denkanstoß mit gemessener Trefferquote, keine Prognose.'));
+}
+function aehnlichKarte(a) {
+  if (!a.vorhanden) return hinweisKarte('Ähnliche Fälle früher', a.hinweis, a.fehler);
+  const zelle = c => {
+    if (!c || !c.n) return h('td', { class: 'z leise' }, '–');
+    if (c.median != null) return h('td', { class: 'z ' + vorzeichen(c.median) }, 'Ø ' + pz(c.median * 100), h('small', null, 'n=' + c.n + ' · ' + Math.round((c.anteil_negativ ?? 0) * 100) + ' % negativ' + (c.auffaellig ? ' · ' + c.auffaellig + ' als üblich' : '')));
+    return h('td', { class: 'z leise' }, 'n=' + c.n, h('small', null, (c.werte || []).map(v => pz(v * 100)).join(', ')));
+  };
+  const hz = ['1T', '1W', '1M', '3M'], hzt = { '1T': '1 Tag', '1W': '1 Woche', '1M': '1 Monat', '3M': '3 Monate' };
+  return h('div', { class: 'karte muster' }, h('h2', null, 'Ähnliche Fälle früher'),
+    h('p', null, 'Zum wichtigsten Thema des Radars: ', h('b', null, a.thema.titel), ' (' + a.thema.verlage_6h + ' Quellen in 6 Std.)'),
+    h('p', { class: 'leise klein' }, 'Gefunden: ' + a.n + ' frühere Ereignisse' + (a.n_muster !== a.n ? ', davon ' + a.n_muster + ' mit hoher Übereinstimmung in die Mehrmarkt-Reaktion gerechnet' : '') + '. Ereignisse der letzten ' + a.min_alter_tage + ' Tage zählen nicht.'),
+    h('table', null, h('thead', null, h('tr', null, h('th', null, 'Beginn'), h('th', null, 'Ereignis'), h('th', null, 'Art'), h('th', null, 'Warum ähnlich'))),
+      h('tbody', null, a.treffer.map(t => h('tr', null, h('td', { class: 'nowrap' }, t.beginn), h('td', null, t.titel), h('td', null, t.art), h('td', { class: 'leise klein' }, t.gruende.join('; ') + ' (' + zahl(t.punkte, 1) + ' Pkt.)'))))),
+    h('h3', null, 'Mehrmarkt-Reaktion nach diesen Ereignissen (n = ' + a.n_muster + ' Ereignisse)'),
+    a.gruppen.length ? h('table', null, h('thead', null, h('tr', null, h('th', null, 'Markt'), ...hz.map(x => h('th', { class: 'z' }, 'nach ' + hzt[x])))),
+      h('tbody', null, a.gruppen.map(g => h('tr', null, h('td', null, g.name), ...hz.map(x => zelle(g.h[x])))))) : h('p', { class: 'leise' }, a.hinweis_historie || 'Keine Reihen geladen.'),
+    a.nicht_geladen && a.nicht_geladen.length ? h('p', { class: 'leise klein' }, 'Nicht geladen (fehlen in der Tabelle): ' + a.nicht_geladen.map(x => x[1] || x).join('; ') + '. Laden: python3 -m kitrader.historie laden') : null,
+    h('p', { class: 'leise klein' }, 'Ab n = ' + a.min_n + ' stehen Median und Anteil negativ da, darunter nur die Einzelwerte. Die Fälle überschneiden sich und sind im Nachhinein ausgewählt: ein Rückblick, der eingrenzt und nichts garantiert.'));
+}
+async function ladeTrends() {
+  if (trendsZustand.laeuft) return;
+  trendsZustand.laeuft = true;
+  const wurzel = $('#tr-inhalt');
+  try {
+    if (!wurzel.children.length) leeren(wurzel, h('p', { class: 'leise' }, 'Wird geladen ...'));
+    const d = await api('/api/trends');
+    $('#tr-stand').textContent = 'Anzeige von ' + new Date(d.stand).toLocaleTimeString('de-DE');
+    leeren(wurzel, weltKarte(d.welt), radarKarte(d.radar), kiRichtungKarte(d.ki), aehnlichKarte(d.aehnlich));
+  } catch (e) { leeren(wurzel, meldung('fehler', 'Trends nicht ladbar: ' + e.message)); }
+  finally { trendsZustand.laeuft = false; }
+}
+$('#tr-neu').addEventListener('click', () => ladeTrends().catch(() => {}));
+$('#tr-knopf').addEventListener('click', async () => {
+  const knopf = $('#tr-knopf'), ziel = $('#tr-meldung');
+  knopf.disabled = true;
+  const berichte = [];
+  for (const [teil, name, dauer] of [['welt', 'Welt-Rotation', 'wenige Sekunden'], ['nachrichten', 'Nachrichten-Radar', 'ein bis drei Minuten']]) {
+    leeren(ziel, ...berichte, h('p', { class: 'leise' }, name + ' wird abgerufen (' + dauer + ') ...'));
+    try {
+      const d = await api('/api/trends/abrufen', { post: true, daten: { teil } });
+      berichte.push(d.hinweis ? meldung('warn', name + ': ' + d.hinweis) : meldung(d.fehler.length ? 'warn' : 'gut', name + ': abgerufen' + (d.zusammenfassung ? ' (' + d.zusammenfassung + ')' : '') + (d.fehler.length ? '. Probleme: ' + d.fehler.join('; ') : '.')));
+    } catch (e) { berichte.push(meldung('fehler', name + ': ' + e.message)); }
+  }
+  leeren(ziel, ...berichte);
+  knopf.disabled = false;
+  await ladeTrends();
+});
+
+// ---------- Not-Aus
+const dialog = $('#notaus-dialog');
+function dialogOeffnen() {
+  const modus = $('#modus').textContent;
+  leeren($('#nd-text'),
+    h('p', null, 'Das storniert die offenen Orders und stellt die Positionen der ', h('b', null, 'eigenen Symbole'), ' (autopilot.symbole und vom Autopiloten eröffnete) zum Marktpreis glatt (Betriebsart ', h('b', null, modus), ') und sperrt danach jeden Handel. Fremde Positionen bleiben unberührt; das ganze Konto: python3 -m kitrader notaus --alles.'),
+    modus === 'ECHTGELD' ? meldung('fehler', 'Das betrifft ECHTES GELD.') : null,
+    h('p', { class: 'leise klein' }, 'Aufheben geht bewusst nur am Rechner: python3 -m kitrader notaus --aufheben'));
+  leeren($('#nd-schritte'));
+  $('#nd-titel').textContent = 'Not-Aus auslösen?';
+  $('#nd-ja').disabled = false; $('#nd-ja').hidden = false; $('#nd-abbruch').textContent = 'Abbrechen';
+  if (dialog.showModal) dialog.showModal(); else dialog.setAttribute('open', '');
+}
+$('#notaus-knopf').addEventListener('click', dialogOeffnen);
+$('#nd-abbruch').addEventListener('click', () => dialog.close ? dialog.close() : dialog.removeAttribute('open'));
+$('#nd-ja').addEventListener('click', async () => {
+  const ja = $('#nd-ja');
+  ja.disabled = true;
+  leeren($('#nd-schritte'), h('li', null, 'Wird ausgeführt ...'));
+  try {
+    const e = await api('/api/notaus', { post: true });
+    leeren($('#nd-schritte'), e.schritte.map(s => h('li', { class: s.startsWith('FEHLER') ? 'fehler' : null }, s)),
+      h('li', { class: e.ok ? null : 'fehler' }, e.ok ? 'Fertig. Der Handel ist gesperrt.' : 'ACHTUNG: ' + e.fehler));
+    $('#nd-titel').textContent = e.ok ? 'Not-Aus ausgelöst' : 'Not-Aus ausgelöst, aber nicht vollständig';
+    ja.hidden = true; $('#nd-abbruch').textContent = 'Schließen';
+    ladeUebersicht().catch(() => {});
+  } catch (err) {
+    leeren($('#nd-schritte'), h('li', { class: 'fehler' }, 'Not-Aus NICHT bestätigt: ' + err.message + '. Auf dem Rechner ausführen: python3 -m kitrader notaus'));
+    ja.disabled = false;
+  }
+});
+
+// ---------- Start
+for (const b of document.querySelectorAll('nav button')) b.addEventListener('click', () => reiter(b.dataset.tab));
+setInterval(() => { if (!document.hidden) ladeUebersicht(aktuellerReiter() !== 'uebersicht').catch(() => {}); }, 10000);
+setInterval(() => { if (!document.hidden && aktuellerReiter() === 'live') ladeLive().catch(() => {}); }, 30000);
+(async () => {
+  try { INFO = await api('/api/info'); } catch (e) { /* Übersicht zeigt den Fehler */ }
+  if (INFO) { const m = $('#modus'); m.textContent = INFO.modus_text; m.className = 'modus ' + INFO.modus; }     // Betriebsart sofort zeigen, auch wenn die Übersicht noch lädt
+  const start = (location.hash || '').slice(1);
+  if (start && start !== 'uebersicht') ladeUebersicht(true).catch(() => {});
+  reiter(start);
+})();
+})();
+</script>
+</body>
+</html>

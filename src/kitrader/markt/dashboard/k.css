@@ -1,0 +1,102 @@
+/* Reiter der Handelsteile im Dashboard: Trends, KI, Weltlage, Autopilot (k.js). Nutzt die Farben und Bausteine von seite.html / ui.css. */
+.k-hinweis { color: var(--ton-3); font-size: var(--t-klein); margin: 6px 0 0; max-width: 90ch; }
+.k-leiste { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin: 4px 0 2px; }
+.k-leiste .leise-text { margin-left: 4px; }
+.k-fehler { color: var(--kritisch-text, var(--kritisch)); background: var(--kritisch-weich); border-radius: var(--radius-s); padding: 8px 12px; margin: 8px 0; font-size: var(--t-text); }
+.k-ok { color: var(--gut-text, var(--gut)); background: var(--gut-weich); border-radius: var(--radius-s); padding: 8px 12px; margin: 8px 0; font-size: var(--t-text); }
+.k-leer { color: var(--ton-2); background: var(--karte-tief); border: 1px dashed var(--linie-stark); border-radius: var(--radius-s); padding: 12px 14px; font-size: var(--t-text); }
+.k-leer code, .k-hinweis code, .k-fehler code { font-family: var(--mono-schrift, ui-monospace, monospace); font-size: .92em; }
+.k-gitter { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; align-items: start; }
+.k-kasten { background: var(--karte); border: 1px solid var(--linie); border-radius: var(--radius); padding: 14px 18px; box-shadow: var(--schatten); }
+.k-kasten h3 { margin: 0 0 6px; font-size: var(--t-lese); font-weight: 600; }
+.k-kasten h3 small { color: var(--ton-3); font-weight: 400; font-size: var(--t-klein); margin-left: 6px; }
+.k-kasten p { margin: 6px 0 0; }
+.k-tab { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.k-tab th { text-align: left; font-weight: 500; color: var(--ton-3); font-size: var(--t-klein); padding: 5px 8px; border-bottom: 1px solid var(--linie); white-space: nowrap; }
+.k-tab td { padding: 5px 8px; border-bottom: 1px solid var(--linie); vertical-align: top; overflow-wrap: anywhere; }
+.k-tab tr:last-child td { border-bottom: 0; }
+.k-tab .r, .k-tab th.r { text-align: right; }
+.k-tab td small, .k-tab small { color: var(--ton-3); font-size: var(--t-klein); display: block; font-weight: 400; }
+.k-w { text-align: right; font-weight: 600; white-space: nowrap; border-radius: 4px; }
+.k-w.n { color: var(--ton-3); font-weight: 400; }
+.k-gut { color: var(--gut-text, var(--gut)); }
+.k-schlecht { color: var(--kritisch-text, var(--kritisch)); }
+.k-leise { color: var(--ton-3); }
+.k-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; }
+.k-chip { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: var(--t-klein); background: var(--karte-tief); border: 1px solid var(--linie); color: var(--ton-2); }
+.k-chip.markt { background: var(--akzent-weich); border-color: transparent; color: var(--akzent); }
+.k-chip.region { background: var(--warnung-weich, var(--karte-tief)); border-color: transparent; }
+.k-chip.neu { background: var(--gut-weich); color: var(--gut-text, var(--gut)); border-color: transparent; }
+.k-themen { list-style: none; margin: 0; padding: 0; }
+.k-themen li { padding: 9px 0; border-bottom: 1px solid var(--linie); }
+.k-themen li:last-child { border-bottom: 0; }
+.k-themen .titel { font-weight: 600; }
+.k-themen .titel a { color: inherit; text-decoration: none; }
+.k-themen .titel a:hover { text-decoration: underline; }
+.k-themen .zahlen { color: var(--ton-3); font-size: var(--t-klein); margin-top: 2px; }
+.k-rang { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; margin-top: 10px; }
+.k-rang h4 { margin: 0 0 4px; font-size: var(--t-text); color: var(--ton-2); }
+.k-rang ul { list-style: none; margin: 0; padding: 0; font-variant-numeric: tabular-nums; }
+.k-rang li { display: flex; justify-content: space-between; gap: 8px; padding: 1px 0; }
+/* Richtung (KI) */
+.k-pfeil { display: inline-block; font-weight: 800; line-height: 1; margin-right: 5px; }
+.k-pfeil.steigt { color: var(--gut-text, var(--gut)); }
+.k-pfeil.faellt { color: var(--kritisch-text, var(--kritisch)); }
+.k-pfeil.seitwaerts { color: var(--ton-3); }
+.k-karten { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+.k-ki .gross { font-size: var(--t-gross, 24px); font-weight: 700; letter-spacing: -.01em; }
+.k-ki .gross .k-pfeil { font-size: 1.15em; }
+.k-ki .horizont { color: var(--ton-3); font-size: var(--t-klein); text-transform: uppercase; letter-spacing: .05em; }
+.k-ki h4 { margin: 10px 0 2px; font-size: var(--t-klein); text-transform: uppercase; letter-spacing: .05em; color: var(--ton-3); font-weight: 600; }
+.k-ki p { margin: 0; }
+.k-balken { height: 8px; border-radius: 4px; background: var(--karte-tief); border: 1px solid var(--linie); overflow: hidden; margin: 6px 0 2px; }
+.k-balken span { display: block; height: 100%; background: var(--ton-3); }
+.k-balken.steigt span { background: var(--gut); }
+.k-balken.faellt span { background: var(--kritisch); }
+.k-wert-wahl { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
+.k-wert-wahl button { font: inherit; font-size: var(--t-text); padding: 4px 12px; border-radius: 999px; border: 1px solid var(--linie-stark); background: var(--karte-tief); color: var(--ton-2); cursor: pointer; }
+.k-wert-wahl button[aria-pressed="true"] { background: var(--akzent-weich); border-color: var(--akzent); color: var(--akzent); font-weight: 600; }
+.k-eingabe { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 6px; }
+.k-eingabe input, .k-eingabe select { font: inherit; font-size: var(--t-ui); padding: 7px 11px; border-radius: 10px; border: 1px solid var(--feld-rand, var(--linie-stark)); background: var(--feld, var(--karte-tief)); color: var(--ton-1); min-width: 0; }
+.k-eingabe input { width: 20ch; }
+.k-erkannt { font-size: var(--t-text); min-height: 1.5em; margin-top: 4px; color: var(--ton-2); }
+.k-erkannt b { color: var(--ton-1); }
+.k-erkannt.fehler { color: var(--kritisch-text, var(--kritisch)); }
+/* Weltlage */
+.k-stufe { display: inline-block; padding: 0 7px; border-radius: 4px; font-size: var(--t-klein); font-weight: 600; background: var(--karte-tief); border: 1px solid var(--linie); }
+.k-stufe.rot, .k-stufe.war, .k-stufe.critical, .k-stufe.high { background: var(--kritisch-weich); color: var(--kritisch-text, var(--kritisch)); border-color: transparent; }
+.k-stufe.orange, .k-stufe.warn, .k-stufe.medium { background: var(--warnung-weich, #fdf4e2); color: #a86a00; border-color: transparent; }
+.k-text { white-space: pre-wrap; font-family: var(--mono-schrift, ui-monospace, monospace); font-size: var(--t-klein); line-height: 1.5; background: var(--karte-tief); border-radius: var(--radius-s); padding: 10px 12px; overflow-x: auto; max-height: 460px; overflow-y: auto; }
+details.k-roh { margin-top: 12px; }
+details.k-roh summary { cursor: pointer; color: var(--ton-2); font-size: var(--t-text); }
+/* Autopilot */
+.k-modus { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 22px; padding: 16px 22px; border-radius: var(--radius); border: 2px solid; margin-bottom: 12px; }
+.k-modus .gross { font-size: 30px; font-weight: 800; letter-spacing: .04em; line-height: 1.1; }
+.k-modus .klein { font-size: var(--t-text); }
+.k-modus.papier { background: var(--akzent-weich); border-color: var(--akzent); color: var(--akzent); }
+.k-modus.demo { background: var(--warnung-weich, #fdf4e2); border-color: #d99a00; color: #a86a00; }
+.k-modus.echt { background: var(--kritisch); border-color: var(--kritisch); color: #fff; }
+.k-modus.echt .klein { color: #fff; }
+.k-notaus { margin-left: auto; font: inherit; font-size: 22px; font-weight: 800; letter-spacing: .06em; color: #fff; background: #c62828; border: 3px solid #7f1d1d; border-radius: 12px; padding: 14px 34px; cursor: pointer; box-shadow: 0 2px 10px rgb(198 40 40 / .35); }
+.k-notaus:hover { background: #a61c1c; }
+.k-banner { display: none; background: #c62828; color: #fff; padding: 10px 16px; font-weight: 700; text-align: center; border-radius: var(--radius-s); margin-bottom: 10px; }
+.k-banner.an { display: block; }
+.k-status-punkt { display: inline-block; width: 11px; height: 11px; border-radius: 50%; background: var(--ton-3); margin-right: 8px; vertical-align: middle; }
+.k-status-punkt.an { background: var(--gut); box-shadow: 0 0 0 4px var(--gut-weich); }
+.k-status-punkt.pause { background: #d99a00; }
+.k-grenze { display: grid; grid-template-columns: minmax(130px, 1.2fr) minmax(0, 1fr) minmax(120px, 1fr); gap: 4px 12px; align-items: center; padding: 5px 0; border-bottom: 1px solid var(--linie); }
+.k-grenze:last-child { border-bottom: 0; }
+.k-grenze .balken { height: 7px; border-radius: 4px; background: var(--karte-tief); border: 1px solid var(--linie); overflow: hidden; }
+.k-grenze .balken span { display: block; height: 100%; background: var(--gut); }
+.k-grenze.warn .balken span { background: #d99a00; }
+.k-grenze.rot .balken span { background: var(--kritisch); }
+.k-dialog { border: 2px solid #7f1d1d; border-radius: 14px; padding: 22px 26px; max-width: 520px; background: var(--karte); color: var(--ton-1); }
+.k-dialog::backdrop { background: rgb(0 0 0 / .55); }
+.k-dialog h3 { margin: 0 0 8px; color: #c62828; }
+.k-dialog .knoepfe { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; }
+.k-dialog ol { padding-left: 20px; margin: 8px 0 0; }
+.k-ereignisse { max-height: 340px; overflow-y: auto; }
+.k-ereignisse tr[data-id] { cursor: pointer; }
+.k-ereignisse tr[data-id]:hover td { background: var(--karte-tief); }
+.k-ereignisse tr.gewaehlt td { background: var(--akzent-weich); }
+@media (max-width: 760px) { .k-grenze { grid-template-columns: 1fr 1fr; } .k-notaus { margin-left: 0; width: 100%; } .k-modus .gross { font-size: 24px; } }
